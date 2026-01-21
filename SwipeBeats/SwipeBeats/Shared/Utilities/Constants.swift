@@ -1,7 +1,6 @@
-//
-//  Constants.swift
-//  SwipeBeats
-//
-//  Created by Vu Minh Khoi Ha on 21.01.26.
-//
+import Foundation
 
+enum Constants {
+    static let defaultSearchTerm = "lofi"
+    static let defaultSearchLimit = 25
+}
