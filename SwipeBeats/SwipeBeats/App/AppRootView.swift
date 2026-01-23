@@ -1,7 +1,8 @@
-//
-//  AppRootView.swift.swift
-//  SwipeBeats
-//
-//  Created by Vu Minh Khoi Ha on 21.01.26.
-//
+import SwiftUI
+
+struct AppRootView: View {
+    var body: some View {
+        SwipeView()
+    }
+}
 
