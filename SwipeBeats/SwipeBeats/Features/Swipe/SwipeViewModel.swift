@@ -16,10 +16,20 @@ final class SwipeViewModel: ObservableObject {
     @Published private(set) var currentIndex: Int = 0
 
     private let service: ITunesSearching
+    private let likesStore: LikedTracksStore?
+
+    let audio: AudioPlayerService
 
     // IMPORTANT: avoid `= ITunesSearchService()` default argument
-    init(service: ITunesSearching? = nil) {
+    // Block 3: inject likesStore + audio; likesStore is optional until wiring is done in the root view.
+    init(
+        service: ITunesSearching? = nil,
+        likesStore: LikedTracksStore? = nil,
+        audio: AudioPlayerService? = nil
+    ) {
         self.service = service ?? ITunesSearchService()
+        self.likesStore = likesStore
+        self.audio = audio ?? AudioPlayerService()
     }
 
     func loadInitial() async {
@@ -38,6 +48,7 @@ final class SwipeViewModel: ObservableObject {
             } else {
                 state = .content
             }
+            playCurrentPreviewIfAvailable()
         } catch {
             if error is DecodingError {
                 state = .error(AppError.decoding.errorDescription ?? "Fehler")
@@ -56,11 +67,15 @@ final class SwipeViewModel: ObservableObject {
 
     func skip() {
         goToNext()
+        playCurrentPreviewIfAvailable()
     }
 
     func like() {
-        // Persist kommt in Block 3
+        if let track = currentTrack {
+            likesStore?.like(track)
+        }
         goToNext()
+        playCurrentPreviewIfAvailable()
     }
 
     private func goToNext() {
@@ -70,6 +85,13 @@ final class SwipeViewModel: ObservableObject {
             state = .content
         } else {
             state = .empty
+        }
+    }
+
+    private func playCurrentPreviewIfAvailable() {
+        audio.stop()
+        if let url = currentTrack?.previewURL {
+            audio.play(url: url)
         }
     }
 }

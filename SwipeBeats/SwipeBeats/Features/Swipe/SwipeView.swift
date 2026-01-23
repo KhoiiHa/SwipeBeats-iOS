@@ -1,12 +1,16 @@
 import SwiftUI
 
 struct SwipeView: View {
-    @StateObject private var viewModel = SwipeViewModel()
-
+    @StateObject private var viewModel: SwipeViewModel
     private let handler = SwipeGestureHandler()
 
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingOut = false
+
+    init(viewModel: SwipeViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
 
     var body: some View {
         ZStack {
@@ -45,7 +49,7 @@ struct SwipeView: View {
 
                     VStack(spacing: 16) {
                         ZStack(alignment: .top) {
-                            SwipeCardView(track: track)
+                            SwipeCardView(track: track, audio: viewModel.audio)
                                 .padding(.horizontal)
                                 .offset(x: dragOffset.width, y: dragOffset.height * 0.15)
                                 .rotationEffect(handler.rotation(for: dragOffset))
