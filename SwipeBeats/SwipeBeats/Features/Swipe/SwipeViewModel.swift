@@ -14,14 +14,14 @@ final class SwipeViewModel: ObservableObject {
     @Published private(set) var state: ViewState = .loading
     @Published private(set) var tracks: [Track] = []
     @Published private(set) var currentIndex: Int = 0
+    @Published private(set) var currentSearchTerm: String = Constants.defaultSearchTerm
 
     private let service: ITunesSearching
     private let likesStore: LikedTracksStore?
 
     let audio: AudioPlayerService
 
-    // IMPORTANT: avoid `= ITunesSearchService()` default argument
-    // Block 3: inject likesStore + audio; likesStore is optional until wiring is done in the root view.
+    // IMPORTANT: avoid `= ITunesSearchService()` and `= AudioPlayerService()` default arguments (actor-isolation issue)
     init(
         service: ITunesSearching? = nil,
         likesStore: LikedTracksStore? = nil,
@@ -33,21 +33,18 @@ final class SwipeViewModel: ObservableObject {
     }
 
     func loadInitial() async {
+        await load(term: Constants.defaultSearchTerm)
+    }
+
+    func load(term: String, limit: Int = Constants.defaultSearchLimit) async {
         state = .loading
         currentIndex = 0
+        currentSearchTerm = term
 
         do {
-            let result = try await service.search(
-                term: Constants.defaultSearchTerm,
-                limit: Constants.defaultSearchLimit
-            )
+            let result = try await service.search(term: term, limit: limit)
             tracks = result
-
-            if tracks.isEmpty {
-                state = .empty
-            } else {
-                state = .content
-            }
+            state = tracks.isEmpty ? .empty : .content
             playCurrentPreviewIfAvailable()
         } catch {
             if error is DecodingError {

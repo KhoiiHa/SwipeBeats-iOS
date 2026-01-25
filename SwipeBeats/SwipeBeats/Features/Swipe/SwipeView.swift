@@ -6,6 +6,7 @@ struct SwipeView: View {
 
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingOut = false
+    @State private var selectedTerm: String = Constants.defaultSearchTerm
 
     init(viewModel: SwipeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -24,7 +25,7 @@ struct SwipeView: View {
                         .font(.headline)
 
                     Button("Neu laden") {
-                        Task { await viewModel.loadInitial() }
+                        Task { await viewModel.load(term: selectedTerm) }
                     }
                 }
 
@@ -38,7 +39,7 @@ struct SwipeView: View {
                         .foregroundStyle(.secondary)
 
                     Button("Erneut versuchen") {
-                        Task { await viewModel.loadInitial() }
+                        Task { await viewModel.load(term: selectedTerm) }
                     }
                 }
 
@@ -48,6 +49,7 @@ struct SwipeView: View {
                     let overlayOpacity = handler.overlayOpacity(for: dragOffset)
 
                     VStack(spacing: 16) {
+                        searchHeader
                         ZStack(alignment: .top) {
                             SwipeCardView(track: track, audio: viewModel.audio)
                                 .padding(.horizontal)
@@ -86,7 +88,14 @@ struct SwipeView: View {
             }
         }
         .task {
-            await viewModel.loadInitial()
+            await viewModel.load(term: selectedTerm)
+        }
+        .onChange(of: selectedTerm) { _, newValue in
+            // Reset swipe UI state when switching presets
+            dragOffset = .zero
+            isAnimatingOut = false
+
+            Task { await viewModel.load(term: newValue) }
         }
     }
 
@@ -141,5 +150,25 @@ struct SwipeView: View {
 
         dragOffset = .zero
         isAnimatingOut = false
+    }
+
+    private var searchHeader: some View {
+        HStack(spacing: 12) {
+            Picker("Genre", selection: $selectedTerm) {
+                ForEach(Constants.searchPresets) { preset in
+                    Text(preset.title).tag(preset.term)
+                }
+            }
+            .pickerStyle(.menu)
+
+            Button {
+                Task { await viewModel.load(term: selectedTerm) }
+            } label: {
+                Image(systemName: "arrow.clockwise")
+            }
+            .buttonStyle(.bordered)
+            .disabled(viewModel.state == .loading)
+        }
+        .padding(.horizontal)
     }
 }
