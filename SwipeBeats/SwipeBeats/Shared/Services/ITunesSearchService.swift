@@ -13,7 +13,7 @@ final class ITunesSearchService: ITunesSearching {
         self.decoder = decoder
     }
 
-    func search(term: String, limit: Int = 25) async throws -> [Track] {
+    func search(term: String, limit: Int) async throws -> [Track] {
         let url = try makeSearchURL(term: term, limit: limit)
         let (data, response) = try await session.data(from: url)
 

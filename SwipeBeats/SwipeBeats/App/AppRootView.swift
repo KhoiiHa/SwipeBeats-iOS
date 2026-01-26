@@ -16,6 +16,14 @@ struct AppRootView: View {
             }
 
             NavigationStack {
+                ExploreView()
+                    .navigationTitle("Explore")
+            }
+            .tabItem {
+                Label("Explore", systemImage: "magnifyingglass")
+            }
+
+            NavigationStack {
                 LikedListView()
                     .navigationTitle("Liked")
             }
@@ -25,4 +33,3 @@ struct AppRootView: View {
         }
     }
 }
-
