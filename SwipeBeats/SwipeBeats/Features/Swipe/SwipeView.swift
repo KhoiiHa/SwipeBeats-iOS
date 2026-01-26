@@ -7,6 +7,7 @@ struct SwipeView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingOut = false
     @State private var selectedTerm: String = Constants.defaultSearchTerm
+    @State private var detailTrack: Track?
 
     init(viewModel: SwipeViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -50,7 +51,7 @@ struct SwipeView: View {
 
                     VStack(spacing: 16) {
                         searchHeader
-                        ZStack(alignment: .top) {
+                        ZStack(alignment: .topTrailing) {
                             SwipeCardView(track: track, audio: viewModel.audio)
                                 .padding(.horizontal)
                                 .offset(x: dragOffset.width, y: dragOffset.height * 0.15)
@@ -58,6 +59,16 @@ struct SwipeView: View {
                                 .gesture(dragGesture)
                                 .animation(.spring(response: 0.3, dampingFraction: 0.85), value: dragOffset)
                                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: isAnimatingOut)
+
+                            Button {
+                                detailTrack = track
+                            } label: {
+                                Image(systemName: "info.circle.fill")
+                                    .font(.title2)
+                                    .symbolRenderingMode(.hierarchical)
+                            }
+                            .padding(.trailing, 26)
+                            .padding(.top, 18)
 
                             SwipeOverlayView(decision: decision, opacity: overlayOpacity)
                                 .padding(.horizontal)
@@ -96,6 +107,11 @@ struct SwipeView: View {
             isAnimatingOut = false
 
             Task { await viewModel.load(term: newValue) }
+        }
+        .sheet(item: $detailTrack) { track in
+            NavigationStack {
+                TrackDetailView(track: track, audio: viewModel.audio)
+            }
         }
     }
 

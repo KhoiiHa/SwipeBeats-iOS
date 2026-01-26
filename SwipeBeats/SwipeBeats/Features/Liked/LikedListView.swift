@@ -15,6 +15,8 @@ struct LikedListView: View {
     @Query(sort: \LikedTrackEntity.createdAt, order: .reverse)
     private var likedTracks: [LikedTrackEntity]
 
+    @State private var detailTrack: Track?
+
     var body: some View {
         Group {
             if likedTracks.isEmpty {
@@ -27,7 +29,7 @@ struct LikedListView: View {
                 List {
                     ForEach(likedTracks) { item in
                         Button {
-                            openCollectionLink(for: item)
+                            detailTrack = makeTrack(from: item)
                         } label: {
                             row(item)
                         }
@@ -35,6 +37,11 @@ struct LikedListView: View {
                     }
                     .onDelete(perform: delete)
                 }
+            }
+        }
+        .sheet(item: $detailTrack) { track in
+            NavigationStack {
+                TrackDetailView(track: track, audio: AudioPlayerService())
             }
         }
     }
@@ -58,7 +65,7 @@ struct LikedListView: View {
 
             Spacer()
 
-            Image(systemName: "arrow.up.right")
+            Image(systemName: "chevron.right")
                 .foregroundStyle(.secondary)
         }
         .contentShape(Rectangle())
@@ -108,5 +115,16 @@ struct LikedListView: View {
             modelContext.delete(likedTracks[index])
         }
         try? modelContext.save()
+    }
+
+    private func makeTrack(from item: LikedTrackEntity) -> Track {
+        Track(
+            id: item.trackId,
+            artistName: item.artistName,
+            trackName: item.trackName,
+            artworkURL: item.artworkURL.flatMap(URL.init(string:)),
+            previewURL: item.previewURL.flatMap(URL.init(string:)),
+            collectionViewURL: item.collectionViewURL.flatMap(URL.init(string:))
+        )
     }
 }

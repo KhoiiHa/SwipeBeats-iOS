@@ -26,15 +26,16 @@ final class LikedTrackEntity {
     var createdAt: Date
 
     init(
+        uuid: UUID = UUID(),
         trackId: Int,
         trackName: String,
         artistName: String,
         artworkURL: String? = nil,
         previewURL: String? = nil,
         collectionViewURL: String? = nil,
-        createdAt: Date = Date()
+        createdAt: Date = .now
     ) {
-        self.uuid = UUID()
+        self.uuid = uuid
         self.trackId = trackId
         self.trackName = trackName
         self.artistName = artistName
