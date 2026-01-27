@@ -1,10 +1,18 @@
 import SwiftUI
 
 struct ExploreView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
+
     @StateObject private var viewModel = ExploreViewModel()
     @StateObject private var audio = AudioPlayerService()
 
     @State private var selectedTerm: String = Constants.defaultSearchTerm
+    @State private var selectedTrack: Track?
+
+    private var likesStore: LikedTracksStore {
+        LikedTracksStore(context: modelContext)
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -24,6 +32,11 @@ struct ExploreView: View {
         }
         .onChange(of: viewModel.limit) { _, _ in
             Task { await viewModel.searchCurrentQuery() }
+        }
+        .sheet(item: $selectedTrack) { track in
+            NavigationStack {
+                TrackDetailView(track: track, audio: audio)
+            }
         }
     }
 
@@ -170,10 +183,49 @@ struct ExploreView: View {
         case .content:
             List {
                 ForEach(viewModel.results) { track in
-                    NavigationLink {
-                        TrackDetailView(track: track, audio: audio)
+                    Button {
+                        selectedTrack = track
                     } label: {
                         TrackRowView(track: track)
+                    }
+                    .buttonStyle(.plain)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button {
+                            likesStore.like(track)
+                        } label: {
+                            Label("Like", systemImage: "heart")
+                        }
+                        .tint(.pink)
+
+                        if let url = track.collectionViewURL {
+                            Button {
+                                openURL(url)
+                            } label: {
+                                Label("Öffnen", systemImage: "arrow.up.right.square")
+                            }
+                            .tint(.blue)
+                        }
+                    }
+                    .contextMenu {
+                        Button {
+                            selectedTrack = track
+                        } label: {
+                            Label("Details", systemImage: "info.circle")
+                        }
+
+                        Button {
+                            likesStore.like(track)
+                        } label: {
+                            Label("Like", systemImage: "heart")
+                        }
+
+                        if let url = track.collectionViewURL {
+                            Button {
+                                openURL(url)
+                            } label: {
+                                Label("In Apple Music öffnen", systemImage: "arrow.up.right.square")
+                            }
+                        }
                     }
                 }
             }

@@ -10,9 +10,20 @@ struct TrackDetailView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var isLiked = false
+    let onExploreArtist: ((String) -> Void)?
 
     private var store: LikedTracksStore {
         LikedTracksStore(context: modelContext)
+    }
+
+    init(
+        track: Track,
+        audio: AudioPlayerService,
+        onExploreArtist: ((String) -> Void)? = nil
+    ) {
+        self.track = track
+        self.audio = audio
+        self.onExploreArtist = onExploreArtist
     }
 
     var body: some View {
@@ -69,6 +80,23 @@ struct TrackDetailView: View {
                     .buttonStyle(.bordered)
                     .padding(.horizontal)
                 }
+
+                Button {
+                    // Close the detail view and trigger an Explore search (if provided)
+                    dismiss()
+                    onExploreArtist?(track.artistName)
+                } label: {
+                    Label {
+                        Text("Mehr von \(track.artistName)")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                    } icon: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
 
                 Spacer(minLength: 12)
             }
