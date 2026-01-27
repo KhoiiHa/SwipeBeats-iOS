@@ -201,7 +201,7 @@ struct ExploreView: View {
                             Button {
                                 openURL(url)
                             } label: {
-                                Label("Öffnen", systemImage: "arrow.up.right.square")
+                                Label("Apple Music", systemImage: "arrow.up.right.square")
                             }
                             .tint(.blue)
                         }
@@ -223,7 +223,7 @@ struct ExploreView: View {
                             Button {
                                 openURL(url)
                             } label: {
-                                Label("In Apple Music öffnen", systemImage: "arrow.up.right.square")
+                                Label("Apple Music", systemImage: "arrow.up.right.square")
                             }
                         }
                     }

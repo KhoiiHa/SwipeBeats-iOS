@@ -81,22 +81,23 @@ struct TrackDetailView: View {
                     .padding(.horizontal)
                 }
 
-                Button {
-                    // Close the detail view and trigger an Explore search (if provided)
-                    dismiss()
-                    onExploreArtist?(track.artistName)
-                } label: {
-                    Label {
-                        Text("Mehr von \(track.artistName)")
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.85)
-                    } icon: {
-                        Image(systemName: "magnifyingglass")
+                if let onExploreArtist {
+                    Button {
+                        dismiss()
+                        onExploreArtist(track.artistName)
+                    } label: {
+                        Label {
+                            Text("Mehr von \(track.artistName)")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                        } icon: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .buttonStyle(.bordered)
+                    .padding(.horizontal)
                 }
-                .buttonStyle(.bordered)
-                .padding(.horizontal)
 
                 Spacer(minLength: 12)
             }
