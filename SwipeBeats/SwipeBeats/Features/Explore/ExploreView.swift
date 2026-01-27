@@ -17,7 +17,10 @@ struct ExploreView: View {
             await viewModel.loadPreset(term: selectedTerm)
         }
         .onChange(of: viewModel.onlyWithPreview) { _, _ in
-            Task { await viewModel.searchCurrentQuery() }
+            viewModel.applyFilters()
+        }
+        .onChange(of: viewModel.sortOption) { _, _ in
+            viewModel.applyFilters()
         }
         .onChange(of: viewModel.limit) { _, _ in
             Task { await viewModel.searchCurrentQuery() }
@@ -43,6 +46,39 @@ struct ExploreView: View {
                 .disabled(viewModel.state == .loading || viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
+            if !viewModel.recentSearches.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Letzte Suchen")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        Button("Leeren") {
+                            viewModel.clearHistory()
+                        }
+                        .font(.caption)
+                    }
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.recentSearches, id: \.self) { term in
+                                Button {
+                                    Task { await viewModel.useRecent(term) }
+                                } label: {
+                                    Text(term)
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                    }
+                }
+            }
+
             HStack(spacing: 12) {
                 Picker("Preset", selection: $selectedTerm) {
                     ForEach(Constants.searchPresets) { preset in
@@ -60,15 +96,34 @@ struct ExploreView: View {
                 .disabled(viewModel.state == .loading)
             }
 
-            HStack(spacing: 12) {
-                Toggle("Nur mit Preview", isOn: $viewModel.onlyWithPreview)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 12) {
+                    Toggle("Nur mit Preview", isOn: $viewModel.onlyWithPreview)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
 
-                Picker("Limit", selection: $viewModel.limit) {
-                    Text("25").tag(25)
-                    Text("50").tag(50)
+                    Spacer(minLength: 8)
+
+                    Picker("Sort", selection: $viewModel.sortOption) {
+                        ForEach(ExploreViewModel.SortOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 140)
+
+                HStack {
+                    Text("Limit")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Picker("Limit", selection: $viewModel.limit) {
+                        Text("25").tag(25)
+                        Text("50").tag(50)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 140)
+                }
             }
             .font(.subheadline)
         }
