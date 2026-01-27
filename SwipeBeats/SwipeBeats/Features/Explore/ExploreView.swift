@@ -16,6 +16,12 @@ struct ExploreView: View {
         .task(id: selectedTerm) {
             await viewModel.loadPreset(term: selectedTerm)
         }
+        .onChange(of: viewModel.onlyWithPreview) { _, _ in
+            Task { await viewModel.searchCurrentQuery() }
+        }
+        .onChange(of: viewModel.limit) { _, _ in
+            Task { await viewModel.searchCurrentQuery() }
+        }
     }
 
     private var header: some View {
@@ -53,6 +59,18 @@ struct ExploreView: View {
                 .buttonStyle(.bordered)
                 .disabled(viewModel.state == .loading)
             }
+
+            HStack(spacing: 12) {
+                Toggle("Nur mit Preview", isOn: $viewModel.onlyWithPreview)
+
+                Picker("Limit", selection: $viewModel.limit) {
+                    Text("25").tag(25)
+                    Text("50").tag(50)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 140)
+            }
+            .font(.subheadline)
         }
         .padding(.horizontal)
     }
@@ -111,5 +129,3 @@ struct ExploreView: View {
         }
     }
 }
-
-
