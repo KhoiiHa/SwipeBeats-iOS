@@ -29,7 +29,10 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func stop() {
-        player?.pause()
+        if let player {
+            player.pause()
+            player.seek(to: .zero)
+        }
         player = nil
         state = .stopped
     }
