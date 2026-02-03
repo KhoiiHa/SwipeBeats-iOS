@@ -51,6 +51,8 @@ final class ExploreViewModel: ObservableObject {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else {
             results = []
+            allResults = []
+            lastSearchedTerm = ""
             state = .idle
             return
         }
@@ -73,6 +75,8 @@ final class ExploreViewModel: ObservableObject {
         let sorted = applySorting(to: filtered)
 
         results = sorted
+
+        if case .loading = state { return }
 
         // If we haven’t searched yet, keep idle.
         guard !lastSearchedTerm.isEmpty else {
@@ -137,11 +141,11 @@ final class ExploreViewModel: ObservableObject {
     private func search(term: String) async {
         state = .loading
         lastSearchedTerm = term
-        addToHistory(term)
 
         do {
             let items = try await service.search(term: term, limit: limit)
             allResults = items
+            addToHistory(term)
             applyFilters()
         } catch {
             if error is DecodingError {
