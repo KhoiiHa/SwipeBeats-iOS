@@ -37,6 +37,8 @@ final class ExploreViewModel: ObservableObject {
 
     @Published private(set) var recentSearches: [String] = []
 
+    private var searchTask: Task<Void, Never>?
+
     init(service: ITunesSearching? = nil) {
         self.service = service ?? ITunesSearchService()
         recentSearches = loadHistory()
@@ -139,22 +141,35 @@ final class ExploreViewModel: ObservableObject {
     }
 
     private func search(term: String) async {
-        state = .loading
-        lastSearchedTerm = term
+        searchTask?.cancel()
 
-        do {
-            let items = try await service.search(term: term, limit: limit)
-            allResults = items
-            addToHistory(term)
-            applyFilters()
-        } catch {
-            if error is DecodingError {
-                state = .error(AppError.decoding.errorDescription ?? "Fehler")
-            } else if (error as? URLError) != nil {
-                state = .error(AppError.network.errorDescription ?? "Fehler")
-            } else {
-                state = .error(AppError.unknown.errorDescription ?? "Fehler")
+        let task = Task { @MainActor in
+            if Task.isCancelled { return }
+
+            state = .loading
+            lastSearchedTerm = term
+
+            do {
+                let items = try await service.search(term: term, limit: limit)
+                if Task.isCancelled { return }
+
+                allResults = items
+                addToHistory(term)
+                applyFilters()
+            } catch {
+                if Task.isCancelled { return }
+
+                if error is DecodingError {
+                    state = .error(AppError.decoding.errorDescription ?? "Fehler")
+                } else if (error as? URLError) != nil {
+                    state = .error(AppError.network.errorDescription ?? "Fehler")
+                } else {
+                    state = .error(AppError.unknown.errorDescription ?? "Fehler")
+                }
             }
         }
+
+        searchTask = task
+        await task.value
     }
 }
