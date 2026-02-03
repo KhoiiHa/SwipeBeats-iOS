@@ -1,10 +1,12 @@
 import Foundation
 import SwiftData
+import os
 
 @MainActor
 final class LikedTracksStore {
 
     private let context: ModelContext
+    private let logger = Logger(subsystem: "SwipeBeats", category: "LikedTracksStore")
 
     init(context: ModelContext) {
         self.context = context
@@ -31,7 +33,12 @@ final class LikedTracksStore {
         )
 
         context.insert(entity)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            logger.error("Failed to save liked track (id: \(track.id)). \(error.localizedDescription)")
+            context.delete(entity)
+        }
     }
 
     func unlike(trackId: Int) {
@@ -39,8 +46,33 @@ final class LikedTracksStore {
             predicate: #Predicate { $0.trackId == trackId }
         )
         if let entity = try? context.fetch(descriptor).first {
+            let snapshot = (
+                uuid: entity.uuid,
+                trackId: entity.trackId,
+                trackName: entity.trackName,
+                artistName: entity.artistName,
+                artworkURL: entity.artworkURL,
+                previewURL: entity.previewURL,
+                collectionViewURL: entity.collectionViewURL,
+                createdAt: entity.createdAt
+            )
             context.delete(entity)
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to remove liked track (id: \(trackId)). \(error.localizedDescription)")
+                let rollback = LikedTrackEntity(
+                    uuid: snapshot.uuid,
+                    trackId: snapshot.trackId,
+                    trackName: snapshot.trackName,
+                    artistName: snapshot.artistName,
+                    artworkURL: snapshot.artworkURL,
+                    previewURL: snapshot.previewURL,
+                    collectionViewURL: snapshot.collectionViewURL,
+                    createdAt: snapshot.createdAt
+                )
+                context.insert(rollback)
+            }
         }
     }
 }
