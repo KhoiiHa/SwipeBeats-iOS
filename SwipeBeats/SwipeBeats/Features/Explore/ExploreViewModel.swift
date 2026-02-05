@@ -44,9 +44,9 @@ final class ExploreViewModel: ObservableObject {
         recentSearches = loadHistory()
     }
 
-    func loadPreset(term: String) async {
-        query = term
-        await search(term: term)
+    func loadPreset(_ preset: SearchPreset) async {
+        query = preset.term
+        await search(term: preset.term, mode: preset.mode)
     }
 
     func searchCurrentQuery() async {
@@ -58,7 +58,7 @@ final class ExploreViewModel: ObservableObject {
             state = .idle
             return
         }
-        await search(term: term)
+        await search(term: term, mode: .keyword)
     }
 
     func applyFilters(forceStateUpdate: Bool = false) {
@@ -107,7 +107,7 @@ final class ExploreViewModel: ObservableObject {
 
     func useRecent(_ term: String) async {
         query = term
-        await search(term: term)
+        await search(term: term, mode: .keyword)
     }
 
     func clearHistory() {
@@ -140,7 +140,7 @@ final class ExploreViewModel: ObservableObject {
         UserDefaults.standard.set(data, forKey: historyKey)
     }
 
-    private func search(term: String) async {
+    private func search(term: String, mode: SearchPreset.Mode) async {
         searchTask?.cancel()
 
         let task = Task { @MainActor in
@@ -150,7 +150,7 @@ final class ExploreViewModel: ObservableObject {
             lastSearchedTerm = term
 
             do {
-                let items = try await service.search(term: term, limit: limit)
+                let items = try await service.search(term: term, limit: limit, mode: mode)
                 if Task.isCancelled { return }
 
                 allResults = items

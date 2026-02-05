@@ -2,6 +2,13 @@ import Foundation
 
 protocol ITunesSearching {
     func search(term: String, limit: Int) async throws -> [Track]
+    func search(term: String, limit: Int, mode: SearchPreset.Mode) async throws -> [Track]
+}
+
+extension ITunesSearching {
+    func search(term: String, limit: Int) async throws -> [Track] {
+        try await search(term: term, limit: limit, mode: .keyword)
+    }
 }
 
 final class ITunesSearchService: ITunesSearching {
@@ -13,8 +20,8 @@ final class ITunesSearchService: ITunesSearching {
         self.decoder = decoder
     }
 
-    func search(term: String, limit: Int) async throws -> [Track] {
-        let url = try makeSearchURL(term: term, limit: limit)
+    func search(term: String, limit: Int, mode: SearchPreset.Mode) async throws -> [Track] {
+        let url = try makeSearchURL(term: term, limit: limit, mode: mode)
         let (data, response) = try await session.data(from: url)
 
         guard let http = response as? HTTPURLResponse else {
@@ -28,7 +35,7 @@ final class ITunesSearchService: ITunesSearching {
         return decoded.results.compactMap { $0.toDomain() }
     }
 
-    private func makeSearchURL(term: String, limit: Int) throws -> URL {
+    private func makeSearchURL(term: String, limit: Int, mode: SearchPreset.Mode) throws -> URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "itunes.apple.com"
@@ -39,6 +46,18 @@ final class ITunesSearchService: ITunesSearching {
             URLQueryItem(name: "entity", value: "song"),
             URLQueryItem(name: "limit", value: String(limit))
         ]
+
+        // Narrow the search scope for presets.
+        switch mode {
+        case .genre:
+            components.queryItems?.append(URLQueryItem(name: "attribute", value: "genreIndex"))
+        case .artist:
+            components.queryItems?.append(URLQueryItem(name: "attribute", value: "artistTerm"))
+        case .song:
+            components.queryItems?.append(URLQueryItem(name: "attribute", value: "songTerm"))
+        case .keyword:
+            break
+        }
 
         guard let url = components.url else {
             throw URLError(.badURL)

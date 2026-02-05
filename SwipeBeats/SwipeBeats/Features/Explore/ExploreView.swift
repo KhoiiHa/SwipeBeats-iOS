@@ -22,7 +22,9 @@ struct ExploreView: View {
         }
         .padding(.top, 8)
         .task(id: selectedTerm) {
-            await viewModel.loadPreset(term: selectedTerm)
+            if let preset = Constants.searchPresets.first(where: { $0.term == selectedTerm }) {
+                await viewModel.loadPreset(preset)
+            }
         }
         .onChange(of: viewModel.onlyWithPreview) { _, _ in
             viewModel.applyFilters()
@@ -110,7 +112,8 @@ struct ExploreView: View {
                 .pickerStyle(.menu)
 
                 Button {
-                    Task { await viewModel.loadPreset(term: selectedTerm) }
+                    guard let preset = Constants.searchPresets.first(where: { $0.term == selectedTerm }) else { return }
+                    Task { await viewModel.loadPreset(preset) }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
