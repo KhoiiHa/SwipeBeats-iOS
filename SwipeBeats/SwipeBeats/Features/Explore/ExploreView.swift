@@ -33,7 +33,7 @@ struct ExploreView: View {
             viewModel.applyFilters()
         }
         .onChange(of: viewModel.limit) { _, _ in
-            Task { await viewModel.searchCurrentQuery() }
+            Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
         }
         .sheet(item: $selectedTrack) { track in
             NavigationStack {
@@ -260,7 +260,7 @@ struct ExploreView: View {
             }
             .listStyle(.plain)
             .refreshable {
-                await viewModel.searchCurrentQuery()
+                await viewModel.searchCurrentQuery(forceKeyword: false)
             }
         }
     }

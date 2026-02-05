@@ -31,6 +31,7 @@ final class ExploreViewModel: ObservableObject {
     @Published private(set) var allResults: [Track] = []
 
     private let service: ITunesSearching
+    private var lastSearchMode: SearchPreset.Mode = .keyword
 
     private let historyKey = "SwipeBeats.Explore.RecentSearches"
     private let historyLimit = 8
@@ -46,10 +47,11 @@ final class ExploreViewModel: ObservableObject {
 
     func loadPreset(_ preset: SearchPreset) async {
         query = preset.term
+        lastSearchMode = preset.mode
         await search(term: preset.term, mode: preset.mode)
     }
 
-    func searchCurrentQuery() async {
+    func searchCurrentQuery(forceKeyword: Bool = true) async {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else {
             results = []
@@ -58,7 +60,12 @@ final class ExploreViewModel: ObservableObject {
             state = .idle
             return
         }
-        await search(term: term, mode: .keyword)
+        if forceKeyword {
+            lastSearchMode = .keyword
+            await search(term: term, mode: .keyword)
+        } else {
+            await search(term: term, mode: lastSearchMode)
+        }
     }
 
     func applyFilters(forceStateUpdate: Bool = false) {
@@ -107,7 +114,8 @@ final class ExploreViewModel: ObservableObject {
 
     func useRecent(_ term: String) async {
         query = term
-        await search(term: term, mode: .keyword)
+        lastSearchMode = .keyword
+        await search(term: term, mode: lastSearchMode)
     }
 
     func clearHistory() {
@@ -148,6 +156,7 @@ final class ExploreViewModel: ObservableObject {
 
             state = .loading
             lastSearchedTerm = term
+            lastSearchMode = mode
 
             do {
                 let items = try await service.search(term: term, limit: limit, mode: mode)
