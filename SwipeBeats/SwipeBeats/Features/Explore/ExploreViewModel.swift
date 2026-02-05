@@ -61,7 +61,7 @@ final class ExploreViewModel: ObservableObject {
         await search(term: term)
     }
 
-    func applyFilters() {
+    func applyFilters(forceStateUpdate: Bool = false) {
         // Don’t override an error state; user should retry search.
         if case .error = state { return }
 
@@ -78,7 +78,7 @@ final class ExploreViewModel: ObservableObject {
 
         results = sorted
 
-        if case .loading = state { return }
+        if case .loading = state, forceStateUpdate == false { return }
 
         // If we haven’t searched yet, keep idle.
         guard !lastSearchedTerm.isEmpty else {
@@ -155,7 +155,7 @@ final class ExploreViewModel: ObservableObject {
 
                 allResults = items
                 addToHistory(term)
-                applyFilters()
+                applyFilters(forceStateUpdate: true)
             } catch {
                 if Task.isCancelled { return }
 

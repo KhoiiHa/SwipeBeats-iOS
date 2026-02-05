@@ -35,7 +35,16 @@ struct ExploreView: View {
         }
         .sheet(item: $selectedTrack) { track in
             NavigationStack {
-                TrackDetailView(track: track, audio: audio)
+                TrackDetailView(
+                    track: track,
+                    audio: audio,
+                    onExploreArtist: { artistName in
+                        // Close the sheet and run a new Explore search for the artist
+                        selectedTrack = nil
+                        viewModel.query = artistName
+                        Task { await viewModel.searchCurrentQuery() }
+                    }
+                )
             }
         }
     }
@@ -183,6 +192,7 @@ struct ExploreView: View {
         case .content:
             List {
                 ForEach(viewModel.results) { track in
+                    let isLiked = likesStore.isLiked(trackId: track.id)
                     Button {
                         selectedTrack = track
                     } label: {
@@ -191,11 +201,19 @@ struct ExploreView: View {
                     .buttonStyle(.plain)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button {
-                            likesStore.like(track)
+                            if isLiked {
+                                likesStore.unlike(trackId: track.id)
+                            } else {
+                                likesStore.like(track)
+                            }
                         } label: {
-                            Label("Like", systemImage: "heart")
+                            if isLiked {
+                                Label("Like entfernen", systemImage: "heart.slash")
+                            } else {
+                                Label("Like", systemImage: "heart")
+                            }
                         }
-                        .tint(.pink)
+                        .tint(isLiked ? .gray : .pink)
 
                         if let url = track.collectionViewURL {
                             Button {
@@ -214,9 +232,17 @@ struct ExploreView: View {
                         }
 
                         Button {
-                            likesStore.like(track)
+                            if isLiked {
+                                likesStore.unlike(trackId: track.id)
+                            } else {
+                                likesStore.like(track)
+                            }
                         } label: {
-                            Label("Like", systemImage: "heart")
+                            if isLiked {
+                                Label("Like entfernen", systemImage: "heart.slash")
+                            } else {
+                                Label("Like", systemImage: "heart")
+                            }
                         }
 
                         if let url = track.collectionViewURL {
