@@ -157,111 +157,113 @@ struct ExploreView: View {
 
     @ViewBuilder
     private var content: some View {
-        switch viewModel.state {
-        case .idle:
-            ContentUnavailableView(
-                "Suche starten",
-                systemImage: "magnifyingglass",
-                description: Text("Wähle ein Preset oder suche nach einem Begriff.")
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-        case .loading:
-            ProgressView("Lade Tracks…")
+        Group {
+            switch viewModel.state {
+            case .idle:
+                ContentUnavailableView(
+                    "Suche starten",
+                    systemImage: "magnifyingglass",
+                    description: Text("Wähle ein Preset oder suche nach einem Begriff.")
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-        case .empty:
-            ContentUnavailableView(
-                "Keine Treffer",
-                systemImage: "music.note",
-                description: Text("Versuche einen anderen Begriff.")
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .loading:
+                ProgressView("Lade Tracks…")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-        case .error(let message):
-            VStack(spacing: 12) {
+            case .empty:
                 ContentUnavailableView(
-                    "Fehler",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text(message)
+                    "Keine Treffer",
+                    systemImage: "music.note",
+                    description: Text("Versuche einen anderen Begriff.")
                 )
-                Button("Erneut versuchen") {
-                    Task { await viewModel.searchCurrentQuery() }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            case .error(let message):
+                VStack(spacing: 12) {
+                    ContentUnavailableView(
+                        "Fehler",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text(message)
+                    )
+                    Button("Erneut versuchen") {
+                        Task { await viewModel.searchCurrentQuery() }
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.borderedProminent)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-        case .content:
-            List {
-                ForEach(viewModel.results) { track in
-                    let isLiked = likesStore.isLiked(trackId: track.id)
-                    Button {
-                        audio.setNowPlaying(title: track.trackName, artist: track.artistName)
-                        selectedTrack = track
-                    } label: {
-                        TrackRowView(track: track)
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            case .content:
+                List {
+                    ForEach(viewModel.results) { track in
+                        let isLiked = likesStore.isLiked(trackId: track.id)
                         Button {
-                            if isLiked {
-                                likesStore.unlike(trackId: track.id)
-                            } else {
-                                likesStore.like(track)
-                            }
-                        } label: {
-                            if isLiked {
-                                Label("Like entfernen", systemImage: "heart.slash")
-                            } else {
-                                Label("Like", systemImage: "heart")
-                            }
-                        }
-                        .tint(isLiked ? .gray : .pink)
-
-                        if let url = track.collectionViewURL {
-                            Button {
-                                openURL(url)
-                            } label: {
-                                Label("Apple Music", systemImage: "arrow.up.right.square")
-                            }
-                            .tint(.blue)
-                        }
-                    }
-                    .contextMenu {
-                        Button {
+                            audio.setNowPlaying(title: track.trackName, artist: track.artistName)
                             selectedTrack = track
                         } label: {
-                            Label("Details", systemImage: "info.circle")
+                            TrackRowView(track: track)
                         }
-
-                        Button {
-                            if isLiked {
-                                likesStore.unlike(trackId: track.id)
-                            } else {
-                                likesStore.like(track)
-                            }
-                        } label: {
-                            if isLiked {
-                                Label("Like entfernen", systemImage: "heart.slash")
-                            } else {
-                                Label("Like", systemImage: "heart")
-                            }
-                        }
-
-                        if let url = track.collectionViewURL {
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button {
-                                openURL(url)
+                                if isLiked {
+                                    likesStore.unlike(trackId: track.id)
+                                } else {
+                                    likesStore.like(track)
+                                }
                             } label: {
-                                Label("Apple Music", systemImage: "arrow.up.right.square")
+                                if isLiked {
+                                    Label("Like entfernen", systemImage: "heart.slash")
+                                } else {
+                                    Label("Like", systemImage: "heart")
+                                }
+                            }
+                            .tint(isLiked ? .gray : .pink)
+
+                            if let url = track.collectionViewURL {
+                                Button {
+                                    openURL(url)
+                                } label: {
+                                    Label("Apple Music", systemImage: "arrow.up.right.square")
+                                }
+                                .tint(.blue)
+                            }
+                        }
+                        .contextMenu {
+                            Button {
+                                selectedTrack = track
+                            } label: {
+                                Label("Details", systemImage: "info.circle")
+                            }
+
+                            Button {
+                                if isLiked {
+                                    likesStore.unlike(trackId: track.id)
+                                } else {
+                                    likesStore.like(track)
+                                }
+                            } label: {
+                                if isLiked {
+                                    Label("Like entfernen", systemImage: "heart.slash")
+                                } else {
+                                    Label("Like", systemImage: "heart")
+                                }
+                            }
+
+                            if let url = track.collectionViewURL {
+                                Button {
+                                    openURL(url)
+                                } label: {
+                                    Label("Apple Music", systemImage: "arrow.up.right.square")
+                                }
                             }
                         }
                     }
                 }
-            }
-            .listStyle(.plain)
-            .refreshable {
-                await viewModel.searchCurrentQuery(forceKeyword: false)
+                .listStyle(.plain)
+                .refreshable {
+                    await viewModel.searchCurrentQuery(forceKeyword: false)
+                }
             }
         }
         .safeAreaInset(edge: .bottom) {

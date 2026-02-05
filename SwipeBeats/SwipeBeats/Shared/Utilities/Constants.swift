@@ -2,7 +2,8 @@ import Foundation
 
 enum Constants {
     // MARK: - Default search
-    nonisolated static let defaultSearchTerm = "lofi"
+    // Must match an existing `searchPresets.term` value (used as Picker tags).
+    nonisolated static let defaultSearchTerm = "lofi beats"
     nonisolated static let defaultSearchLimit = 25
 
     // MARK: - Quick presets (for future UI picker)
