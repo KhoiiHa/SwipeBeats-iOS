@@ -138,10 +138,10 @@ final class ExploreViewModel: ObservableObject {
 
         let entry = encodeEntry(term: normalized, mode: lastSearchMode)
 
-        // Move to front, de-duplicate (case-insensitive)
+        // Move to front, de-duplicate by term (case-insensitive)
         recentSearchEntries.removeAll {
             let parsed = parseEntry($0)
-            return parsed.term.caseInsensitiveCompare(normalized) == .orderedSame && parsed.mode == lastSearchMode
+            return parsed.term.caseInsensitiveCompare(normalized) == .orderedSame
         }
         recentSearchEntries.insert(entry, at: 0)
 
