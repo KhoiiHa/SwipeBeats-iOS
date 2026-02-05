@@ -83,7 +83,6 @@ struct TrackDetailView: View {
 
                 if let onExploreArtist {
                     Button {
-                        audio.stop()
                         dismiss()
                         onExploreArtist(track.artistName)
                     } label: {
@@ -109,13 +108,9 @@ struct TrackDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Fertig") {
-                    audio.stop()
                     dismiss()
                 }
             }
-        }
-        .onDisappear {
-            audio.stop()
         }
         .task {
             isLiked = store.isLiked(trackId: track.id)
