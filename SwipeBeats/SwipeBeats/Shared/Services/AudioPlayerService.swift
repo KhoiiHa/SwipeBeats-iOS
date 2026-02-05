@@ -13,10 +13,16 @@ final class AudioPlayerService: ObservableObject {
     }
 
     @Published private(set) var state: State = .stopped
+    @Published private(set) var nowPlayingTitle: String?
+    @Published private(set) var nowPlayingArtist: String?
 
     private var player: AVPlayer?
+    private(set) var lastPreviewURL: URL?
+
+    var isPlaying: Bool { state == .playing }
 
     func play(url: URL) {
+        lastPreviewURL = url
         let item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: item)
         player?.play()
@@ -37,13 +43,30 @@ final class AudioPlayerService: ObservableObject {
         state = .stopped
     }
 
+    func setNowPlaying(title: String, artist: String) {
+        nowPlayingTitle = title
+        nowPlayingArtist = artist
+    }
+
     func toggle(url: URL?) {
-        guard let url else { return }
+        if let url {
+            lastPreviewURL = url
+            switch state {
+            case .playing:
+                pause()
+            case .paused, .stopped, .failed:
+                play(url: url)
+            }
+            return
+        }
+
         switch state {
         case .playing:
             pause()
         case .paused, .stopped, .failed:
-            play(url: url)
+            if let lastPreviewURL {
+                play(url: lastPreviewURL)
+            }
         }
     }
 }

@@ -197,6 +197,7 @@ struct ExploreView: View {
                 ForEach(viewModel.results) { track in
                     let isLiked = likesStore.isLiked(trackId: track.id)
                     Button {
+                        audio.setNowPlaying(title: track.trackName, artist: track.artistName)
                         selectedTrack = track
                     } label: {
                         TrackRowView(track: track)
@@ -261,6 +262,13 @@ struct ExploreView: View {
             .listStyle(.plain)
             .refreshable {
                 await viewModel.searchCurrentQuery(forceKeyword: false)
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if audio.isPlaying {
+                MiniPlayerBar(audio: audio)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
             }
         }
     }
