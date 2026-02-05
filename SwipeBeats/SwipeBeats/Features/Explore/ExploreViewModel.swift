@@ -37,12 +37,14 @@ final class ExploreViewModel: ObservableObject {
     private let historyLimit = 8
 
     @Published private(set) var recentSearches: [String] = []
+    private var recentSearchEntries: [String] = []
 
     private var searchTask: Task<Void, Never>?
 
     init(service: ITunesSearching? = nil) {
         self.service = service ?? ITunesSearchService()
-        recentSearches = loadHistory()
+        recentSearchEntries = loadHistory()
+        recentSearches = recentSearchEntries.map { parseEntry($0).term }
     }
 
     func loadPreset(_ preset: SearchPreset) async {
@@ -114,12 +116,19 @@ final class ExploreViewModel: ObservableObject {
 
     func useRecent(_ term: String) async {
         query = term
-        lastSearchMode = .keyword
-        await search(term: term, mode: lastSearchMode)
+        if let entry = recentSearchEntries.first(where: { parseEntry($0).term.caseInsensitiveCompare(term) == .orderedSame }) {
+            let parsed = parseEntry(entry)
+            lastSearchMode = parsed.mode
+            await search(term: parsed.term, mode: parsed.mode)
+        } else {
+            lastSearchMode = .keyword
+            await search(term: term, mode: lastSearchMode)
+        }
     }
 
     func clearHistory() {
         recentSearches = []
+        recentSearchEntries = []
         UserDefaults.standard.removeObject(forKey: historyKey)
     }
 
@@ -127,15 +136,21 @@ final class ExploreViewModel: ObservableObject {
         let normalized = term.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return }
 
-        // Move to front, de-duplicate (case-insensitive)
-        recentSearches.removeAll { $0.caseInsensitiveCompare(normalized) == .orderedSame }
-        recentSearches.insert(normalized, at: 0)
+        let entry = encodeEntry(term: normalized, mode: lastSearchMode)
 
-        if recentSearches.count > historyLimit {
-            recentSearches = Array(recentSearches.prefix(historyLimit))
+        // Move to front, de-duplicate (case-insensitive)
+        recentSearchEntries.removeAll {
+            let parsed = parseEntry($0)
+            return parsed.term.caseInsensitiveCompare(normalized) == .orderedSame && parsed.mode == lastSearchMode
+        }
+        recentSearchEntries.insert(entry, at: 0)
+
+        if recentSearchEntries.count > historyLimit {
+            recentSearchEntries = Array(recentSearchEntries.prefix(historyLimit))
         }
 
-        saveHistory(recentSearches)
+        recentSearches = recentSearchEntries.map { parseEntry($0).term }
+        saveHistory(recentSearchEntries)
     }
 
     private func loadHistory() -> [String] {
@@ -146,6 +161,20 @@ final class ExploreViewModel: ObservableObject {
     private func saveHistory(_ items: [String]) {
         guard let data = try? JSONEncoder().encode(items) else { return }
         UserDefaults.standard.set(data, forKey: historyKey)
+    }
+
+    private func encodeEntry(term: String, mode: SearchPreset.Mode) -> String {
+        "\(term)|\(mode.rawValue)"
+    }
+
+    private func parseEntry(_ entry: String) -> (term: String, mode: SearchPreset.Mode) {
+        guard let separator = entry.lastIndex(of: "|") else {
+            return (entry, .keyword)
+        }
+        let term = String(entry[..<separator])
+        let modeRaw = String(entry[entry.index(after: separator)...])
+        let mode = SearchPreset.Mode(rawValue: modeRaw) ?? .keyword
+        return (term, mode)
     }
 
     private func search(term: String, mode: SearchPreset.Mode) async {
