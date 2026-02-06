@@ -3,9 +3,9 @@ import SwiftUI
 struct ExploreView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var audio: AudioPlayerService
 
     @StateObject private var viewModel = ExploreViewModel()
-    @StateObject private var audio = AudioPlayerService()
 
     @State private var selectedTerm: String = Constants.defaultSearchTerm
     @State private var selectedTrack: Track?
@@ -264,13 +264,6 @@ struct ExploreView: View {
                 .refreshable {
                     await viewModel.searchCurrentQuery(forceKeyword: false)
                 }
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            if audio.isPlaying {
-                MiniPlayerBar(audio: audio)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
             }
         }
     }

@@ -11,6 +11,7 @@ import SwiftData
 struct LikedListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var audio: AudioPlayerService
 
     @Query(sort: \LikedTrackEntity.createdAt, order: .reverse)
     private var likedTracks: [LikedTrackEntity]
@@ -41,7 +42,7 @@ struct LikedListView: View {
         }
         .sheet(item: $detailTrack) { track in
             NavigationStack {
-                TrackDetailView(track: track, audio: AudioPlayerService())
+                TrackDetailView(track: track, audio: audio)
             }
         }
     }

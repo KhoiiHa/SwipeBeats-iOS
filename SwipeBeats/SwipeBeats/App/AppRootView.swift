@@ -37,7 +37,7 @@ struct AppRootView: View {
             if audio.isPlaying {
                 MiniPlayerBar(audio: audio)
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 56)
             }
         }
     }
