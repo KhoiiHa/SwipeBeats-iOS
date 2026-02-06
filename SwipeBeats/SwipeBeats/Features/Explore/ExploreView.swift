@@ -70,39 +70,6 @@ struct ExploreView: View {
                 .disabled(viewModel.state == .loading || viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
-            if !viewModel.recentSearches.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Letzte Suchen")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        Button("Leeren") {
-                            viewModel.clearHistory()
-                        }
-                        .font(.caption)
-                    }
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(viewModel.recentSearches, id: \.self) { term in
-                                Button {
-                                    Task { await viewModel.useRecent(term) }
-                                } label: {
-                                    Text(term)
-                                        .font(.caption)
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                        }
-                    }
-                }
-            }
-
             HStack(spacing: 12) {
                 Picker("Preset", selection: $selectedTerm) {
                     ForEach(Constants.searchPresets) { preset in
@@ -159,25 +126,25 @@ struct ExploreView: View {
     private var content: some View {
         Group {
             switch viewModel.state {
-            case .idle:
-                ContentUnavailableView(
-                    "Suche starten",
-                    systemImage: "magnifyingglass",
-                    description: Text("Wähle ein Preset oder suche nach einem Begriff.")
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .idle:
+            ContentUnavailableView(
+                "Suche starten",
+                systemImage: "magnifyingglass",
+                description: Text("Wähle ein Preset oder suche nach einem Begriff. Ergebnisse erscheinen hier.")
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .loading:
                 ProgressView("Lade Tracks…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            case .empty:
-                ContentUnavailableView(
-                    "Keine Treffer",
-                    systemImage: "music.note",
-                    description: Text("Versuche einen anderen Begriff.")
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .empty:
+            ContentUnavailableView(
+                "Keine Treffer",
+                systemImage: "music.note",
+                description: Text("Versuche einen anderen Begriff. Tipp: kürzere Keywords liefern mehr Treffer.")
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .error(let message):
                 VStack(spacing: 12) {
@@ -193,9 +160,28 @@ struct ExploreView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            case .content:
-                List {
-                    ForEach(viewModel.results) { track in
+        case .content:
+            List {
+                if !viewModel.recentSearches.isEmpty {
+                    Section {
+                        ForEach(viewModel.recentSearches, id: \.self) { term in
+                            Button {
+                                Task { await viewModel.useRecent(term) }
+                            } label: {
+                                Text(term)
+                            }
+                        }
+                    } header: {
+                        HStack {
+                            Text("Letzte Suchen")
+                            Spacer()
+                            Button("Verlauf löschen") {
+                                viewModel.clearHistory()
+                            }
+                        }
+                    }
+                }
+                ForEach(viewModel.results) { track in
                     let isLiked = likesStore.isLiked(trackId: track.id)
                     Button {
                         audio.setNowPlaying(track: track)
