@@ -169,17 +169,23 @@ struct ExploreView: View {
                                 Task { await viewModel.useRecent(term) }
                             } label: {
                                 Text(term)
+                                    .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
                         }
                     } header: {
                         HStack {
                             Text("Letzte Suchen")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                             Spacer()
                             Button("Verlauf löschen") {
                                 viewModel.clearHistory()
                             }
+                            .font(.caption)
                         }
                     }
+                    Divider()
                 }
                 ForEach(viewModel.results) { track in
                     let isLiked = likesStore.isLiked(trackId: track.id)
