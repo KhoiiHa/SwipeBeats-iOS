@@ -34,11 +34,15 @@ struct AppRootView: View {
         }
         .environmentObject(audio)
         .safeAreaInset(edge: .bottom) {
-            if audio.isPlaying {
-                MiniPlayerBar(audio: audio)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 56)
+            Group {
+                if audio.isPlaying {
+                    MiniPlayerBar(audio: audio)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 56)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .animation(.easeInOut(duration: 0.22), value: audio.isPlaying)
         }
     }
 }

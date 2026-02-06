@@ -2,19 +2,29 @@ import SwiftUI
 
 struct MiniPlayerBar: View {
     @ObservedObject var audio: AudioPlayerService
+    var onTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(audio.nowPlayingTitle ?? "Unbekannt")
+                Text(audio.nowPlayingTitle?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty ?? "Unbekannt")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .lineLimit(1)
+                    .truncationMode(.tail)
 
-                Text(audio.nowPlayingArtist ?? "")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                if let artist = audio.nowPlayingArtist?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty {
+                    Text(artist)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            }
+            .layoutPriority(1)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onTap?()
             }
 
             Spacer()
@@ -40,5 +50,11 @@ struct MiniPlayerBar: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
     }
 }
