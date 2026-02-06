@@ -186,12 +186,12 @@ struct ExploreView: View {
                         systemImage: "exclamationmark.triangle",
                         description: Text(message)
                     )
-                    Button("Erneut versuchen") {
-                        Task { await viewModel.searchCurrentQuery() }
-                    }
-                    .buttonStyle(.borderedProminent)
+                Button("Erneut versuchen") {
+                    Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .content:
                 List {
