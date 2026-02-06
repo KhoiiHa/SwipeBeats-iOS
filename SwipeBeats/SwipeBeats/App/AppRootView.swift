@@ -3,6 +3,7 @@ import SwiftData
 
 struct AppRootView: View {
     @Environment(\.modelContext) private var modelContext
+    @StateObject private var audio = AudioPlayerService()
     private let di = AppDIContainer()
 
     var body: some View {
@@ -29,6 +30,14 @@ struct AppRootView: View {
             }
             .tabItem {
                 Label("Liked", systemImage: "heart.fill")
+            }
+        }
+        .environmentObject(audio)
+        .safeAreaInset(edge: .bottom) {
+            if audio.isPlaying {
+                MiniPlayerBar(audio: audio)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
             }
         }
     }
