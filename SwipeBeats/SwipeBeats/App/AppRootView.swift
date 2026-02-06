@@ -4,6 +4,7 @@ import SwiftData
 struct AppRootView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var audio = AudioPlayerService()
+    @State private var nowPlayingDetailTrack: Track?
     private let di = AppDIContainer()
 
     var body: some View {
@@ -36,13 +37,22 @@ struct AppRootView: View {
         .safeAreaInset(edge: .bottom) {
             Group {
                 if audio.isPlaying {
-                    MiniPlayerBar(audio: audio)
+                    MiniPlayerBar(audio: audio) {
+                        if let track = audio.nowPlayingTrack {
+                            nowPlayingDetailTrack = track
+                        }
+                    }
                         .padding(.horizontal, 16)
                         .padding(.bottom, 56)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
             .animation(.easeInOut(duration: 0.22), value: audio.isPlaying)
+        }
+        .sheet(item: $nowPlayingDetailTrack) { track in
+            NavigationStack {
+                TrackDetailView(track: track, audio: audio)
+            }
         }
     }
 }

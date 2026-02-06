@@ -196,13 +196,13 @@ struct ExploreView: View {
             case .content:
                 List {
                     ForEach(viewModel.results) { track in
-                        let isLiked = likesStore.isLiked(trackId: track.id)
-                        Button {
-                            audio.setNowPlaying(title: track.trackName, artist: track.artistName)
-                            selectedTrack = track
-                        } label: {
-                            TrackRowView(track: track)
-                        }
+                    let isLiked = likesStore.isLiked(trackId: track.id)
+                    Button {
+                        audio.setNowPlaying(track: track)
+                        selectedTrack = track
+                    } label: {
+                        TrackRowView(track: track)
+                    }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button {

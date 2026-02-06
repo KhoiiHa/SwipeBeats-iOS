@@ -13,6 +13,7 @@ final class AudioPlayerService: ObservableObject {
     }
 
     @Published private(set) var state: State = .stopped
+    @Published var nowPlayingTrack: Track?
     @Published private(set) var nowPlayingTitle: String?
     @Published private(set) var nowPlayingArtist: String?
 
@@ -46,6 +47,12 @@ final class AudioPlayerService: ObservableObject {
     func setNowPlaying(title: String, artist: String) {
         nowPlayingTitle = title
         nowPlayingArtist = artist
+    }
+
+    func setNowPlaying(track: Track) {
+        nowPlayingTrack = track
+        nowPlayingTitle = track.trackName
+        nowPlayingArtist = track.artistName
     }
 
     func toggle(url: URL?) {
