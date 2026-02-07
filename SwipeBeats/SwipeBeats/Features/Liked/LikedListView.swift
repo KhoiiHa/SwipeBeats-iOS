@@ -18,6 +18,10 @@ struct LikedListView: View {
 
     @State private var detailTrack: Track?
 
+    private var likesStore: LikedTracksStore {
+        LikedTracksStore(context: modelContext)
+    }
+
     var body: some View {
         Group {
             if likedTracks.isEmpty {
@@ -113,9 +117,8 @@ struct LikedListView: View {
 
     private func delete(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(likedTracks[index])
+            likesStore.unlike(trackId: likedTracks[index].trackId)
         }
-        try? modelContext.save()
     }
 
     private func makeTrack(from item: LikedTrackEntity) -> Track {
