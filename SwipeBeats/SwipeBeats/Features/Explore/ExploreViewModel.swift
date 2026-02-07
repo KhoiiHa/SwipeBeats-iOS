@@ -42,6 +42,8 @@ final class ExploreViewModel: ObservableObject {
 
     private var searchTask: Task<Void, Never>?
     private var likesStore: LikedTracksStore?
+    @Published private(set) var likedIds: Set<Int> = []
+    private var cancellables = Set<AnyCancellable>()
 
     init(service: ITunesSearching? = nil) {
         self.service = service ?? ITunesSearchService()
@@ -52,11 +54,17 @@ final class ExploreViewModel: ObservableObject {
     func configureLikesStore(context: ModelContext) {
         if likesStore == nil {
             likesStore = LikedTracksStore(context: context)
+            likesStore?.$likedIds
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] ids in
+                    self?.likedIds = ids
+                }
+                .store(in: &cancellables)
         }
     }
 
     func isLiked(trackId: Int) -> Bool {
-        likesStore?.isLiked(trackId: trackId) ?? false
+        likedIds.contains(trackId)
     }
 
     func like(_ track: Track) {

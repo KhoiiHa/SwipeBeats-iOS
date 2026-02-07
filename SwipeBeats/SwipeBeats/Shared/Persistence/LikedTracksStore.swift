@@ -8,6 +8,7 @@ final class LikedTracksStore {
     private let context: ModelContext
     private let logger = Logger(subsystem: "SwipeBeats", category: "LikedTracksStore")
     private var likedIdsCache: Set<Int> = []
+    @Published private(set) var likedIds: Set<Int> = []
 
     init(context: ModelContext) {
         self.context = context
@@ -34,6 +35,7 @@ final class LikedTracksStore {
         do {
             try context.save()
             likedIdsCache.insert(track.id)
+            likedIds = likedIdsCache
         } catch {
             logger.error("Failed to save liked track (id: \(track.id)). \(error.localizedDescription)")
             context.delete(entity)
@@ -59,6 +61,7 @@ final class LikedTracksStore {
             do {
                 try context.save()
                 likedIdsCache.remove(trackId)
+                likedIds = likedIdsCache
             } catch {
                 logger.error("Failed to remove liked track (id: \(trackId)). \(error.localizedDescription)")
                 let rollback = LikedTrackEntity(
@@ -80,5 +83,6 @@ final class LikedTracksStore {
         let descriptor = FetchDescriptor<LikedTrackEntity>()
         let items = (try? context.fetch(descriptor)) ?? []
         likedIdsCache = Set(items.map { $0.trackId })
+        likedIds = likedIdsCache
     }
 }
