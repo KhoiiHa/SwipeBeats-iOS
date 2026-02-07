@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftData
 
 
 @MainActor
@@ -40,11 +41,30 @@ final class ExploreViewModel: ObservableObject {
     private var recentSearchEntries: [String] = []
 
     private var searchTask: Task<Void, Never>?
+    private var likesStore: LikedTracksStore?
 
     init(service: ITunesSearching? = nil) {
         self.service = service ?? ITunesSearchService()
         recentSearchEntries = loadHistory()
         recentSearches = recentSearchEntries.map { parseEntry($0).term }
+    }
+
+    func configureLikesStore(context: ModelContext) {
+        if likesStore == nil {
+            likesStore = LikedTracksStore(context: context)
+        }
+    }
+
+    func isLiked(trackId: Int) -> Bool {
+        likesStore?.isLiked(trackId: trackId) ?? false
+    }
+
+    func like(_ track: Track) {
+        likesStore?.like(track)
+    }
+
+    func unlike(trackId: Int) {
+        likesStore?.unlike(trackId: trackId)
     }
 
     func loadPreset(_ preset: SearchPreset) async {

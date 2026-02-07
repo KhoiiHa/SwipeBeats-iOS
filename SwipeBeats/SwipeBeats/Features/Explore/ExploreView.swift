@@ -10,10 +10,6 @@ struct ExploreView: View {
     @State private var selectedTerm: String = Constants.defaultSearchTerm
     @State private var selectedTrack: Track?
 
-    private var likesStore: LikedTracksStore {
-        LikedTracksStore(context: modelContext)
-    }
-
     var body: some View {
         VStack(spacing: 12) {
             header
@@ -21,6 +17,9 @@ struct ExploreView: View {
             content
         }
         .padding(.top, 8)
+        .task {
+            viewModel.configureLikesStore(context: modelContext)
+        }
         .task(id: selectedTerm) {
             if let preset = Constants.searchPresets.first(where: { $0.term == selectedTerm }) {
                 await viewModel.loadPreset(preset)
@@ -188,7 +187,7 @@ struct ExploreView: View {
                     Divider()
                 }
                 ForEach(viewModel.results) { track in
-                    let isLiked = likesStore.isLiked(trackId: track.id)
+                    let isLiked = viewModel.isLiked(trackId: track.id)
                     Button {
                         audio.setNowPlaying(track: track)
                         selectedTrack = track
@@ -199,9 +198,9 @@ struct ExploreView: View {
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button {
                                 if isLiked {
-                                    likesStore.unlike(trackId: track.id)
+                                    viewModel.unlike(trackId: track.id)
                                 } else {
-                                    likesStore.like(track)
+                                    viewModel.like(track)
                                 }
                             } label: {
                                 if isLiked {
@@ -230,9 +229,9 @@ struct ExploreView: View {
 
                             Button {
                                 if isLiked {
-                                    likesStore.unlike(trackId: track.id)
+                                    viewModel.unlike(trackId: track.id)
                                 } else {
-                                    likesStore.like(track)
+                                    viewModel.like(track)
                                 }
                             } label: {
                                 if isLiked {
