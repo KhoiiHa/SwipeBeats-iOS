@@ -78,7 +78,7 @@ final class ExploreViewModel: ObservableObject {
     func loadPreset(_ preset: SearchPreset) async {
         query = preset.term
         lastSearchMode = preset.mode
-        await search(term: preset.term, mode: preset.mode)
+        await search(term: preset.term, mode: preset.mode, genreId: preset.genreId)
     }
 
     func searchCurrentQuery(forceKeyword: Bool = true) async {
@@ -205,7 +205,7 @@ final class ExploreViewModel: ObservableObject {
         return (term, mode)
     }
 
-    private func search(term: String, mode: SearchPreset.Mode) async {
+    private func search(term: String, mode: SearchPreset.Mode, genreId: Int? = nil) async {
         searchTask?.cancel()
 
         let task = Task { @MainActor in
@@ -216,7 +216,7 @@ final class ExploreViewModel: ObservableObject {
             lastSearchMode = mode
 
             do {
-                let items = try await service.search(term: term, limit: limit, mode: mode)
+                let items = try await service.search(term: term, limit: limit, mode: mode, genreId: genreId)
                 if Task.isCancelled { return }
 
                 allResults = items

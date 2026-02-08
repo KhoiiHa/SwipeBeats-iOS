@@ -3,11 +3,16 @@ import Foundation
 protocol ITunesSearching {
     func search(term: String, limit: Int) async throws -> [Track]
     func search(term: String, limit: Int, mode: SearchPreset.Mode) async throws -> [Track]
+    func search(term: String, limit: Int, mode: SearchPreset.Mode, genreId: Int?) async throws -> [Track]
 }
 
 extension ITunesSearching {
     func search(term: String, limit: Int) async throws -> [Track] {
         try await search(term: term, limit: limit, mode: .keyword)
+    }
+
+    func search(term: String, limit: Int, mode: SearchPreset.Mode) async throws -> [Track] {
+        try await search(term: term, limit: limit, mode: mode, genreId: nil)
     }
 }
 
@@ -20,8 +25,8 @@ final class ITunesSearchService: ITunesSearching {
         self.decoder = decoder
     }
 
-    func search(term: String, limit: Int, mode: SearchPreset.Mode) async throws -> [Track] {
-        let url = try makeSearchURL(term: term, limit: limit, mode: mode)
+    func search(term: String, limit: Int, mode: SearchPreset.Mode, genreId: Int?) async throws -> [Track] {
+        let url = try makeSearchURL(term: term, limit: limit, mode: mode, genreId: genreId)
         let (data, response) = try await session.data(from: url)
 
         guard let http = response as? HTTPURLResponse else {
@@ -32,10 +37,27 @@ final class ITunesSearchService: ITunesSearching {
         }
 
         let decoded = try decoder.decode(ITunesSearchResponse.self, from: data)
-        return decoded.results.compactMap { $0.toDomain() }
+        let results = decoded.results.compactMap { $0.toDomain() }
+
+        if mode == .genre, genreId != nil, results.isEmpty {
+            let fallbackURL = try makeSearchURL(term: term, limit: limit, mode: .keyword, genreId: nil)
+            let (fallbackData, fallbackResponse) = try await session.data(from: fallbackURL)
+
+            guard let fallbackHTTP = fallbackResponse as? HTTPURLResponse else {
+                throw URLError(.badServerResponse)
+            }
+            guard (200...299).contains(fallbackHTTP.statusCode) else {
+                throw URLError(.badServerResponse)
+            }
+
+            let fallbackDecoded = try decoder.decode(ITunesSearchResponse.self, from: fallbackData)
+            return fallbackDecoded.results.compactMap { $0.toDomain() }
+        }
+
+        return results
     }
 
-    private func makeSearchURL(term: String, limit: Int, mode: SearchPreset.Mode) throws -> URL {
+    private func makeSearchURL(term: String, limit: Int, mode: SearchPreset.Mode, genreId: Int?) throws -> URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "itunes.apple.com"
@@ -50,7 +72,13 @@ final class ITunesSearchService: ITunesSearching {
         // Narrow the search scope for presets.
         switch mode {
         case .genre:
-            components.queryItems?.append(URLQueryItem(name: "attribute", value: "genreIndex"))
+            if let genreId {
+                components.queryItems?.removeAll { $0.name == "term" }
+                components.queryItems?.append(URLQueryItem(name: "term", value: String(genreId)))
+                components.queryItems?.append(URLQueryItem(name: "attribute", value: "genreIndex"))
+            } else {
+                // default term already set
+            }
         case .artist:
             components.queryItems?.append(URLQueryItem(name: "attribute", value: "artistTerm"))
         case .song:

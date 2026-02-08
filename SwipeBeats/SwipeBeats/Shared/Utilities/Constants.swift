@@ -41,11 +41,13 @@ struct SearchPreset: Identifiable, Equatable {
     let title: String
     let term: String
     let mode: Mode
+    let genreId: Int?
 
-    init(title: String, term: String, mode: Mode) {
+    init(title: String, term: String, mode: Mode, genreId: Int? = nil) {
         self.title = title
         self.term = term
         self.mode = mode
+        self.genreId = genreId
         self.id = "\(mode.rawValue)|\(term.lowercased())"
     }
 }
