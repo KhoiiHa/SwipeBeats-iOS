@@ -6,7 +6,7 @@ struct SwipeView: View {
 
     @State private var dragOffset: CGSize = .zero
     @State private var isAnimatingOut = false
-    @State private var selectedTerm: String = Constants.defaultSearchTerm
+    @State private var selectedTerm: String = Constants.defaultSearchPresetId
     @State private var detailTrack: Track?
 
     init(viewModel: SwipeViewModel) {
@@ -99,14 +99,22 @@ struct SwipeView: View {
             }
         }
         .task {
-            await viewModel.load(term: selectedTerm)
+            if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
+                await viewModel.load(term: preset.term)
+            } else {
+                await viewModel.load(term: selectedTerm)
+            }
         }
         .onChange(of: selectedTerm) { _, newValue in
             // Reset swipe UI state when switching presets
             dragOffset = .zero
             isAnimatingOut = false
 
-            Task { await viewModel.load(term: newValue) }
+            if let preset = Constants.searchPresets.first(where: { $0.id == newValue }) {
+                Task { await viewModel.load(term: preset.term) }
+            } else {
+                Task { await viewModel.load(term: newValue) }
+            }
         }
         .sheet(item: $detailTrack) { track in
             NavigationStack {
@@ -172,13 +180,17 @@ struct SwipeView: View {
         HStack(spacing: 12) {
             Picker("Genre", selection: $selectedTerm) {
                 ForEach(Constants.searchPresets) { preset in
-                    Text(preset.title).tag(preset.term)
+                    Text(preset.title).tag(preset.id)
                 }
             }
             .pickerStyle(.menu)
 
             Button {
-                Task { await viewModel.load(term: selectedTerm) }
+                if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
+                    Task { await viewModel.load(term: preset.term) }
+                } else {
+                    Task { await viewModel.load(term: selectedTerm) }
+                }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }

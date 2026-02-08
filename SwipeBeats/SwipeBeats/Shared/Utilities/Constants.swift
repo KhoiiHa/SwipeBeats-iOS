@@ -4,6 +4,8 @@ enum Constants {
     // MARK: - Default search
     // Must match an existing `searchPresets.id` value (used as Picker tags).
     nonisolated static let defaultSearchPresetId = "keyword|lofi beats"
+    // Legacy alias for older call sites.
+    nonisolated static let defaultSearchTerm = "lofi beats"
     nonisolated static let defaultSearchLimit = 25
 
     // MARK: - Quick presets (for future UI picker)
