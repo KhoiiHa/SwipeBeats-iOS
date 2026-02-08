@@ -21,11 +21,11 @@ enum Constants {
         .init(title: "Film Score", term: "film score", mode: .keyword),
 
         // Genres
-        .init(title: "Klassik", term: "classical", mode: .genre),
+        .init(title: "Klassik", term: "classical instrumental", mode: .genre),
         .init(title: "Jazz", term: "jazz", mode: .genre),
         .init(title: "K-Pop", term: "k-pop", mode: .genre),
-        .init(title: "Hip-Hop", term: "hip hop", mode: .genre),
-        .init(title: "EDM", term: "edm", mode: .genre),
+        .init(title: "Hip-Hop", term: "hip hop beats", mode: .genre),
+        .init(title: "EDM", term: "electronic dance", mode: .genre),
         .init(title: "Ambient", term: "ambient", mode: .genre)
     ]
 }
