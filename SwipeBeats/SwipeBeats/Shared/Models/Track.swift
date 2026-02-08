@@ -8,6 +8,7 @@ struct Track: Identifiable, Equatable {
     let artworkURL: URL?
     let previewURL: URL?
     let collectionViewURL: URL?
+    let primaryGenreName: String?
 
     var displayTitle: String { trackName }
     var displaySubtitle: String { artistName }
@@ -26,6 +27,7 @@ struct ITunesTrackDTO: Decodable {
     let artworkUrl100: String?
     let previewUrl: String?
     let collectionViewUrl: String?
+    let primaryGenreName: String?
 
     func toDomain() -> Track? {
         guard
@@ -40,7 +42,8 @@ struct ITunesTrackDTO: Decodable {
             trackName: trackName,
             artworkURL: artworkUrl100.flatMap(URL.init(string:)),
             previewURL: previewUrl.flatMap(URL.init(string:)),
-            collectionViewURL: collectionViewUrl.flatMap(URL.init(string:))
+            collectionViewURL: collectionViewUrl.flatMap(URL.init(string:)),
+            primaryGenreName: primaryGenreName
         )
     }
 }

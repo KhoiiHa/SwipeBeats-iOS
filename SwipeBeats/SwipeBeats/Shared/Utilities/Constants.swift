@@ -21,12 +21,12 @@ enum Constants {
         .init(title: "Film Score", term: "film score", mode: .keyword),
 
         // Genres
-        .init(title: "Klassik", term: "classical instrumental", mode: .genre),
-        .init(title: "Jazz", term: "jazz", mode: .genre),
-        .init(title: "K-Pop", term: "k-pop", mode: .genre),
-        .init(title: "Hip-Hop", term: "hip hop beats", mode: .genre),
-        .init(title: "EDM", term: "electronic dance", mode: .genre),
-        .init(title: "Ambient", term: "ambient", mode: .genre)
+        .init(title: "Klassik", term: "classical instrumental", mode: .genre, allowedPrimaryGenres: ["Classical"]),
+        .init(title: "Jazz", term: "jazz", mode: .genre, allowedPrimaryGenres: ["Jazz"]),
+        .init(title: "K-Pop", term: "k-pop", mode: .genre, allowedPrimaryGenres: ["K-Pop"]),
+        .init(title: "Hip-Hop", term: "hip hop beats", mode: .genre, allowedPrimaryGenres: ["Hip-Hop/Rap"]),
+        .init(title: "EDM", term: "electronic dance", mode: .genre, allowedPrimaryGenres: ["Dance", "Electronic"]),
+        .init(title: "Ambient", term: "ambient", mode: .genre, allowedPrimaryGenres: ["Ambient", "Electronic"])
     ]
 }
 
@@ -44,12 +44,14 @@ struct SearchPreset: Identifiable, Equatable {
     let term: String
     let mode: Mode
     let genreId: Int?
+    let allowedPrimaryGenres: [String]
 
-    init(title: String, term: String, mode: Mode, genreId: Int? = nil) {
+    init(title: String, term: String, mode: Mode, genreId: Int? = nil, allowedPrimaryGenres: [String] = []) {
         self.title = title
         self.term = term
         self.mode = mode
         self.genreId = genreId
+        self.allowedPrimaryGenres = allowedPrimaryGenres
         self.id = "\(mode.rawValue)|\(term.lowercased())"
     }
 }

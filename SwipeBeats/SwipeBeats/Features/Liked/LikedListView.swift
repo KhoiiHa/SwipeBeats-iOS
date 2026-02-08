@@ -128,7 +128,8 @@ struct LikedListView: View {
             trackName: item.trackName,
             artworkURL: item.artworkURL.flatMap(URL.init(string:)),
             previewURL: item.previewURL.flatMap(URL.init(string:)),
-            collectionViewURL: item.collectionViewURL.flatMap(URL.init(string:))
+            collectionViewURL: item.collectionViewURL.flatMap(URL.init(string:)),
+            primaryGenreName: nil
         )
     }
 }

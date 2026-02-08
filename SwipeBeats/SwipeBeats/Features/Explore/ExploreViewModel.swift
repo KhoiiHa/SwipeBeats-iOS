@@ -78,7 +78,7 @@ final class ExploreViewModel: ObservableObject {
     func loadPreset(_ preset: SearchPreset) async {
         query = preset.term
         lastSearchMode = preset.mode
-        await search(term: preset.term, mode: preset.mode, genreId: preset.genreId)
+        await search(term: preset.term, mode: preset.mode, genreId: preset.genreId, allowedPrimaryGenres: preset.allowedPrimaryGenres)
     }
 
     func searchCurrentQuery(forceKeyword: Bool = true) async {
@@ -205,7 +205,12 @@ final class ExploreViewModel: ObservableObject {
         return (term, mode)
     }
 
-    private func search(term: String, mode: SearchPreset.Mode, genreId: Int? = nil) async {
+    private func search(
+        term: String,
+        mode: SearchPreset.Mode,
+        genreId: Int? = nil,
+        allowedPrimaryGenres: [String] = []
+    ) async {
         searchTask?.cancel()
 
         let task = Task { @MainActor in
@@ -219,7 +224,13 @@ final class ExploreViewModel: ObservableObject {
                 let items = try await service.search(term: term, limit: limit, mode: mode, genreId: genreId)
                 if Task.isCancelled { return }
 
-                allResults = items
+                let filtered = filterByPrimaryGenreIfNeeded(
+                    items,
+                    mode: mode,
+                    allowedPrimaryGenres: allowedPrimaryGenres
+                )
+
+                allResults = filtered
                 addToHistory(term)
                 applyFilters(forceStateUpdate: true)
             } catch {
@@ -238,4 +249,28 @@ final class ExploreViewModel: ObservableObject {
         searchTask = task
         await task.value
     }
+
+    private func filterByPrimaryGenreIfNeeded(
+        _ items: [Track],
+        mode: SearchPreset.Mode,
+        allowedPrimaryGenres: [String]
+    ) -> [Track] {
+        guard mode == .genre, !allowedPrimaryGenres.isEmpty else { return items }
+
+        let allowed = Set(allowedPrimaryGenres.map { $0.lowercased() })
+        let filtered = items.filter { track in
+            guard let genre = track.primaryGenreName?.lowercased() else { return false }
+            return allowed.contains(genre)
+        }
+
+        if filtered.isEmpty, !items.isEmpty {
+            return items
+        }
+        return filtered
+    }
 }
+
+// Smoke test:
+// - Preset "Klassik": primaryGenreName should mostly be "Classical"
+// - Preset "EDM": should prefer "Dance"/"Electronic"
+// - Preset "Solo Piano" (keyword): unchanged results
