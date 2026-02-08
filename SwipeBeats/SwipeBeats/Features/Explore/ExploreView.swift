@@ -7,7 +7,7 @@ struct ExploreView: View {
 
     @StateObject private var viewModel = ExploreViewModel()
 
-    @State private var selectedTerm: String = Constants.defaultSearchTerm
+    @State private var selectedPresetId: String = Constants.defaultSearchPresetId
     @State private var selectedTrack: Track?
 
     var body: some View {
@@ -20,9 +20,11 @@ struct ExploreView: View {
         .task {
             viewModel.configureLikesStore(context: modelContext)
         }
-        .task(id: selectedTerm) {
-            if let preset = Constants.searchPresets.first(where: { $0.term == selectedTerm }) {
+        .task(id: selectedPresetId) {
+            if let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) {
                 await viewModel.loadPreset(preset)
+            } else {
+                await viewModel.searchCurrentQuery()
             }
         }
         .onChange(of: viewModel.onlyWithPreview) { _, _ in
@@ -70,15 +72,18 @@ struct ExploreView: View {
             }
 
             HStack(spacing: 12) {
-                Picker("Preset", selection: $selectedTerm) {
+                Picker("Preset", selection: $selectedPresetId) {
                     ForEach(Constants.searchPresets) { preset in
-                        Text(preset.title).tag(preset.term)
+                        Text(preset.title).tag(preset.id)
                     }
                 }
                 .pickerStyle(.menu)
 
                 Button {
-                    guard let preset = Constants.searchPresets.first(where: { $0.term == selectedTerm }) else { return }
+                    guard let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) else {
+                        Task { await viewModel.searchCurrentQuery() }
+                        return
+                    }
                     Task { await viewModel.loadPreset(preset) }
                 } label: {
                     Image(systemName: "arrow.clockwise")

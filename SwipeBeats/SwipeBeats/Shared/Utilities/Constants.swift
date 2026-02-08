@@ -2,8 +2,8 @@ import Foundation
 
 enum Constants {
     // MARK: - Default search
-    // Must match an existing `searchPresets.term` value (used as Picker tags).
-    nonisolated static let defaultSearchTerm = "lofi beats"
+    // Must match an existing `searchPresets.id` value (used as Picker tags).
+    nonisolated static let defaultSearchPresetId = "keyword|lofi beats"
     nonisolated static let defaultSearchLimit = 25
 
     // MARK: - Quick presets (for future UI picker)
@@ -37,8 +37,15 @@ struct SearchPreset: Identifiable, Equatable {
         case song
     }
 
-    let id = UUID()
+    let id: String
     let title: String
     let term: String
     let mode: Mode
+
+    init(title: String, term: String, mode: Mode) {
+        self.title = title
+        self.term = term
+        self.mode = mode
+        self.id = "\(mode.rawValue)|\(term.lowercased())"
+    }
 }
