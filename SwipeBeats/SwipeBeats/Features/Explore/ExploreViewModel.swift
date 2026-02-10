@@ -102,6 +102,8 @@ final class ExploreViewModel: ObservableObject {
         // Don’t override an error state; user should retry search.
         if case .error = state { return }
 
+        if case .loading = state, forceStateUpdate == false { return }
+
         // 1) Filter
         let filtered: [Track]
         if onlyWithPreview {
@@ -114,8 +116,6 @@ final class ExploreViewModel: ObservableObject {
         let sorted = applySorting(to: filtered)
 
         results = sorted
-
-        if case .loading = state, forceStateUpdate == false { return }
 
         // If we haven’t searched yet, keep idle.
         guard !lastSearchedTerm.isEmpty else {
