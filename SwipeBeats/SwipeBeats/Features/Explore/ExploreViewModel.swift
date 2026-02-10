@@ -238,8 +238,15 @@ final class ExploreViewModel: ObservableObject {
 
                 if error is DecodingError {
                     state = .error(AppError.decoding.errorDescription ?? "Fehler")
-                } else if (error as? URLError) != nil {
-                    state = .error(AppError.network.errorDescription ?? "Fehler")
+                } else if let urlError = error as? URLError {
+                    switch urlError.code {
+                    case .notConnectedToInternet, .networkConnectionLost:
+                        state = .error("Keine Internetverbindung.")
+                    case .timedOut:
+                        state = .error("Zeitüberschreitung. Bitte erneut versuchen.")
+                    default:
+                        state = .error(AppError.network.errorDescription ?? "Fehler")
+                    }
                 } else {
                     state = .error(AppError.unknown.errorDescription ?? "Fehler")
                 }

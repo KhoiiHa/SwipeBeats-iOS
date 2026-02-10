@@ -27,7 +27,9 @@ final class ITunesSearchService: ITunesSearching {
 
     func search(term: String, limit: Int, mode: SearchPreset.Mode, genreId: Int?) async throws -> [Track] {
         let url = try makeSearchURL(term: term, limit: limit, mode: mode, genreId: genreId)
-        let (data, response) = try await session.data(from: url)
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 15
+        let (data, response) = try await session.data(for: request)
 
         guard let http = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
@@ -41,7 +43,9 @@ final class ITunesSearchService: ITunesSearching {
 
         if mode == .genre, genreId != nil, results.isEmpty {
             let fallbackURL = try makeSearchURL(term: term, limit: limit, mode: .keyword, genreId: nil)
-            let (fallbackData, fallbackResponse) = try await session.data(from: fallbackURL)
+            var fallbackRequest = URLRequest(url: fallbackURL)
+            fallbackRequest.timeoutInterval = 15
+            let (fallbackData, fallbackResponse) = try await session.data(for: fallbackRequest)
 
             guard let fallbackHTTP = fallbackResponse as? HTTPURLResponse else {
                 throw URLError(.badServerResponse)
