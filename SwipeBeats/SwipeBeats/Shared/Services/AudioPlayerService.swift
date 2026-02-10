@@ -23,6 +23,9 @@ final class AudioPlayerService: ObservableObject {
     var isPlaying: Bool { state == .playing }
 
     func play(url: URL) {
+        if let current = lastPreviewURL, current != url {
+            stop()
+        }
         lastPreviewURL = url
         let item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: item)
@@ -57,10 +60,13 @@ final class AudioPlayerService: ObservableObject {
 
     func toggle(url: URL?) {
         if let url {
-            lastPreviewURL = url
             switch state {
             case .playing:
-                pause()
+                if lastPreviewURL == url {
+                    pause()
+                } else {
+                    play(url: url)
+                }
             case .paused, .stopped, .failed:
                 play(url: url)
             }
