@@ -28,26 +28,39 @@ struct TrackDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 18) {
+            VStack(spacing: 16) {
                 AsyncArtworkImage(url: track.artworkURL)
                     .frame(width: 260, height: 260)
-                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                     .shadow(radius: 12)
                     .padding(.top, 8)
 
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
                     Text(track.trackName)
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(.semibold)
+                        .lineLimit(2)
+                        .truncationMode(.tail)
                         .multilineTextAlignment(.center)
 
                     Text(track.artistName)
-                        .font(.headline)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+
+                    if let genre = track.primaryGenreName?.trimmingCharacters(in: .whitespacesAndNewlines), !genre.isEmpty {
+                        Text(genre)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(.secondary.opacity(0.12), in: Capsule())
+                    }
                 }
                 .padding(.horizontal)
 
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     Button {
                         audio.toggle(url: track.previewURL)
                     } label: {
@@ -55,16 +68,26 @@ struct TrackDetailView: View {
                             audio.state == .playing ? "Pause" : "Play",
                             systemImage: audio.state == .playing ? "pause.fill" : "play.fill"
                         )
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(track.previewURL == nil)
+                    .accessibilityLabel(audio.state == .playing ? "Pause Preview" : "Play Preview")
+
+                    Button {
+                        audio.stop()
+                    } label: {
+                        Label("Stop", systemImage: "stop.fill")
+                            .frame(minWidth: 88, minHeight: 44)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel("Stop Preview")
 
                     Button {
                         toggleLike()
                     } label: {
                         Label(isLiked ? "Liked" : "Like", systemImage: isLiked ? "heart.fill" : "heart")
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
                 }
@@ -75,7 +98,7 @@ struct TrackDetailView: View {
                         openURL(url)
                     } label: {
                         Label("In Apple Music öffnen", systemImage: "arrow.up.right.square")
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
                     .padding(.horizontal)
@@ -93,7 +116,7 @@ struct TrackDetailView: View {
                         } icon: {
                             Image(systemName: "magnifyingglass")
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
                     .padding(.horizontal)
