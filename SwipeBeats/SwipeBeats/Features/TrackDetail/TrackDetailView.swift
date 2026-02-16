@@ -10,11 +10,8 @@ struct TrackDetailView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var isLiked = false
+    @State private var likesStore: LikedTracksStore?
     let onExploreArtist: ((String) -> Void)?
-
-    private var store: LikedTracksStore {
-        LikedTracksStore(context: modelContext)
-    }
 
     init(
         track: Track,
@@ -24,6 +21,13 @@ struct TrackDetailView: View {
         self.track = track
         self.audio = audio
         self.onExploreArtist = onExploreArtist
+    }
+
+    private var isCurrentTrackPlaying: Bool {
+        if audio.state != .playing { return false }
+        if let now = audio.nowPlayingTrack, now.id == track.id { return true }
+        if let preview = track.previewURL, let last = audio.lastPreviewURL { return preview == last }
+        return false
     }
 
     var body: some View {
@@ -66,14 +70,14 @@ struct TrackDetailView: View {
                         audio.toggle(url: track.previewURL)
                     } label: {
                         Label(
-                            audio.state == .playing ? "Pause" : "Play",
-                            systemImage: audio.state == .playing ? "pause.fill" : "play.fill"
+                            isCurrentTrackPlaying ? "Pause" : "Play",
+                            systemImage: isCurrentTrackPlaying ? "pause.fill" : "play.fill"
                         )
                         .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(track.previewURL == nil)
-                    .accessibilityLabel(audio.state == .playing ? "Pause Preview" : "Play Preview")
+                    .accessibilityLabel(isCurrentTrackPlaying ? "Pause Preview" : "Play Preview")
 
                     Button {
                         audio.stop()
@@ -82,6 +86,7 @@ struct TrackDetailView: View {
                             .frame(minWidth: 88, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
+                    .disabled(!isCurrentTrackPlaying)
                     .accessibilityLabel("Stop Preview")
 
                     Button {
@@ -137,11 +142,14 @@ struct TrackDetailView: View {
             }
         }
         .task {
+            let store = LikedTracksStore(context: modelContext)
+            likesStore = store
             isLiked = store.isLiked(trackId: track.id)
         }
     }
 
     private func toggleLike() {
+        let store = likesStore ?? LikedTracksStore(context: modelContext)
         if isLiked {
             store.unlike(trackId: track.id)
             isLiked = false

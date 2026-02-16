@@ -14,11 +14,24 @@ struct SwipeCardView: View {
                 Text(track.trackName)
                     .font(.title3)
                     .fontWeight(.semibold)
+                    .lineLimit(2)
+                    .truncationMode(.tail)
                     .multilineTextAlignment(.center)
 
                 Text(track.artistName)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+
+                if let genre = track.primaryGenreName?.trimmingCharacters(in: .whitespacesAndNewlines), !genre.isEmpty {
+                    Text(genre)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(.secondary.opacity(0.12), in: Capsule())
+                }
             }
 
             previewControls
@@ -35,11 +48,11 @@ struct SwipeCardView: View {
             audio.toggle(url: track.previewURL)
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: audio.state == .playing ? "pause.circle.fill" : "play.circle.fill")
+                Image(systemName: isCurrentTrackPlaying ? "pause.circle.fill" : "play.circle.fill")
                     .font(.system(size: 28, weight: .semibold))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(audio.state == .playing ? "Preview pausieren" : "Preview abspielen")
+                    Text(isCurrentTrackPlaying ? "Preview pausieren" : "Preview abspielen")
                         .font(.headline)
                     Text("30s Vorschau")
                         .font(.caption)
@@ -57,5 +70,14 @@ struct SwipeCardView: View {
         .disabled(track.previewURL == nil)
         .opacity(track.previewURL == nil ? 0.5 : 1)
         .accessibilityLabel("Audio Preview")
+    }
+
+    private var isCurrentTrackPlaying: Bool {
+        guard audio.isPlaying else { return false }
+        if let current = audio.nowPlayingTrack {
+            return current.id == track.id
+        }
+        guard let currentURL = audio.lastPreviewURL, let previewURL = track.previewURL else { return false }
+        return currentURL == previewURL
     }
 }
