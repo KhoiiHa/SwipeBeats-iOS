@@ -10,7 +10,13 @@ struct AppRootView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                SwipeView(viewModel: di.makeSwipeViewModel(context: modelContext))
+                SwipeView(
+                    viewModel: SwipeViewModel(
+                        service: di.iTunes,
+                        likesStore: LikedTracksStore(context: modelContext),
+                        audio: audio
+                    )
+                )
                     .navigationTitle("Swipe")
             }
             .tabItem {

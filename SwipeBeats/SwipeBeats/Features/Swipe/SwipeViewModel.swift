@@ -25,11 +25,11 @@ final class SwipeViewModel: ObservableObject {
     init(
         service: ITunesSearching? = nil,
         likesStore: LikedTracksStore? = nil,
-        audio: AudioPlayerService? = nil
+        audio: AudioPlayerService
     ) {
         self.service = service ?? ITunesSearchService()
         self.likesStore = likesStore
-        self.audio = audio ?? AudioPlayerService()
+        self.audio = audio
     }
 
     func loadInitial() async {
