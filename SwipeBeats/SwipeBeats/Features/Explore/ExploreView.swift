@@ -134,7 +134,7 @@ struct ExploreView: View {
             ContentUnavailableView(
                 "Suche starten",
                 systemImage: "magnifyingglass",
-                description: Text("Wähle ein Preset oder suche nach einem Begriff. Ergebnisse erscheinen hier.")
+                description: Text("Wähle ein Preset oder gib einen Suchbegriff ein.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -146,14 +146,14 @@ struct ExploreView: View {
             ContentUnavailableView(
                 "Keine Treffer",
                 systemImage: "music.note",
-                description: Text("Versuche einen anderen Begriff. Tipp: kürzere Keywords liefern mehr Treffer.")
+                description: Text("Keine passenden Songs gefunden. Probiere einen anderen Begriff.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .error(let message):
                 VStack(spacing: 12) {
                     ContentUnavailableView(
-                        "Fehler",
+                        "Laden fehlgeschlagen",
                         systemImage: "exclamationmark.triangle",
                         description: Text(message)
                     )
@@ -172,7 +172,12 @@ struct ExploreView: View {
                             Button {
                                 Task { await viewModel.useRecent(term) }
                             } label: {
-                                Text(term)
+                                HStack {
+                                    Text(term)
+                                        .font(.subheadline)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 8)
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
@@ -187,9 +192,12 @@ struct ExploreView: View {
                                 viewModel.clearHistory()
                             }
                             .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .buttonStyle(.plain)
                         }
+                    } footer: {
+                        Divider()
                     }
-                    Divider()
                 }
                 ForEach(viewModel.results) { track in
                     let isLiked = viewModel.isLiked(trackId: track.id)
@@ -198,6 +206,7 @@ struct ExploreView: View {
                         selectedTrack = track
                     } label: {
                         TrackRowView(track: track)
+                            .padding(.vertical, 4)
                     }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
