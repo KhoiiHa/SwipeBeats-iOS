@@ -19,6 +19,7 @@ final class AudioPlayerService: ObservableObject {
 
     private var player: AVPlayer?
     private(set) var lastPreviewURL: URL?
+    private var pendingNowPlayingTrack: Track?
 
     var isPlaying: Bool { state == .playing }
 
@@ -30,6 +31,7 @@ final class AudioPlayerService: ObservableObject {
         let item = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: item)
         player?.play()
+        syncNowPlaying(for: url)
         state = .playing
     }
 
@@ -53,9 +55,7 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func setNowPlaying(track: Track) {
-        nowPlayingTrack = track
-        nowPlayingTitle = track.trackName
-        nowPlayingArtist = track.artistName
+        pendingNowPlayingTrack = track
     }
 
     func toggle(url: URL?) {
@@ -81,5 +81,23 @@ final class AudioPlayerService: ObservableObject {
                 play(url: lastPreviewURL)
             }
         }
+    }
+
+    private func syncNowPlaying(for url: URL) {
+        if let pending = pendingNowPlayingTrack, pending.previewURL == url {
+            nowPlayingTrack = pending
+            nowPlayingTitle = pending.trackName
+            nowPlayingArtist = pending.artistName
+            pendingNowPlayingTrack = nil
+            return
+        }
+
+        if let current = nowPlayingTrack, current.previewURL == url {
+            return
+        }
+
+        nowPlayingTrack = nil
+        nowPlayingTitle = nil
+        nowPlayingArtist = nil
     }
 }

@@ -62,6 +62,7 @@ struct TrackDetailView: View {
 
                 HStack(spacing: 10) {
                     Button {
+                        audio.setNowPlaying(track: track)
                         audio.toggle(url: track.previewURL)
                     } label: {
                         Label(

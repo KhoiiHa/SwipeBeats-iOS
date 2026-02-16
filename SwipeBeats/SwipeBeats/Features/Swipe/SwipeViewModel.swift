@@ -18,6 +18,7 @@ final class SwipeViewModel: ObservableObject {
 
     private let service: ITunesSearching
     private let likesStore: LikedTracksStore?
+    private var hasLoadedInitially = false
 
     let audio: AudioPlayerService
 
@@ -36,6 +37,11 @@ final class SwipeViewModel: ObservableObject {
         await load(term: Constants.defaultSearchTerm)
     }
 
+    func loadInitialIfNeeded(term: String) async {
+        guard hasLoadedInitially == false else { return }
+        await load(term: term)
+    }
+
     func load(term: String, limit: Int = Constants.defaultSearchLimit) async {
         state = .loading
         currentIndex = 0
@@ -45,7 +51,7 @@ final class SwipeViewModel: ObservableObject {
             let result = try await service.search(term: term, limit: limit)
             tracks = result
             state = tracks.isEmpty ? .empty : .content
-            playCurrentPreviewIfAvailable()
+            hasLoadedInitially = true
         } catch {
             if error is DecodingError {
                 state = .error(AppError.decoding.errorDescription ?? "Fehler")
@@ -64,7 +70,7 @@ final class SwipeViewModel: ObservableObject {
 
     func skip() {
         goToNext()
-        playCurrentPreviewIfAvailable()
+        audio.stop()
     }
 
     func like() {
@@ -72,7 +78,7 @@ final class SwipeViewModel: ObservableObject {
             likesStore?.like(track)
         }
         goToNext()
-        playCurrentPreviewIfAvailable()
+        audio.stop()
     }
 
     private func goToNext() {
@@ -85,10 +91,4 @@ final class SwipeViewModel: ObservableObject {
         }
     }
 
-    private func playCurrentPreviewIfAvailable() {
-        audio.stop()
-        if let url = currentTrack?.previewURL {
-            audio.play(url: url)
-        }
-    }
 }

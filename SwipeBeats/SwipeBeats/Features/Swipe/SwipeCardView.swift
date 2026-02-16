@@ -31,6 +31,7 @@ struct SwipeCardView: View {
 
     private var previewControls: some View {
         Button {
+            audio.setNowPlaying(track: track)
             audio.toggle(url: track.previewURL)
         } label: {
             HStack(spacing: 10) {

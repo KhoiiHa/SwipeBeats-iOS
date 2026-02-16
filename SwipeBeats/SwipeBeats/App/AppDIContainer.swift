@@ -11,8 +11,8 @@ final class AppDIContainer {
         self.iTunes = iTunes ?? ITunesSearchService()
     }
 
-    func makeSwipeViewModel(context: ModelContext) -> SwipeViewModel {
+    func makeSwipeViewModel(context: ModelContext, audio: AudioPlayerService) -> SwipeViewModel {
         let store = LikedTracksStore(context: context)
-        return SwipeViewModel(service: iTunes, likesStore: store)
+        return SwipeViewModel(service: iTunes, likesStore: store, audio: audio)
     }
 }

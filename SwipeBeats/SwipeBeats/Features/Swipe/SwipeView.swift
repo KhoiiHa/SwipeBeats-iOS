@@ -100,9 +100,9 @@ struct SwipeView: View {
         }
         .task {
             if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
-                await viewModel.load(term: preset.term)
+                await viewModel.loadInitialIfNeeded(term: preset.term)
             } else {
-                await viewModel.load(term: selectedTerm)
+                await viewModel.loadInitialIfNeeded(term: selectedTerm)
             }
         }
         .onChange(of: selectedTerm) { _, newValue in
