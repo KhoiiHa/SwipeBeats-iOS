@@ -22,10 +22,6 @@ struct MiniPlayerBar: View {
                 }
             }
             .layoutPriority(1)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                onTap?()
-            }
 
             Spacer()
 
@@ -34,7 +30,7 @@ struct MiniPlayerBar: View {
             } label: {
                 Image(systemName: audio.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .frame(width: 32, height: 32)
+                    .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
 
@@ -43,13 +39,18 @@ struct MiniPlayerBar: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .semibold))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .onTapGesture {
+            onTap?()
+        }
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
     }
 }
 

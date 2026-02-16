@@ -49,7 +49,7 @@ struct AppRootView: View {
                         }
                     }
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 56)
+                        .padding(.bottom, 8)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
