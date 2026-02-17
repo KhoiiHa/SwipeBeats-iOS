@@ -25,7 +25,7 @@ final class AudioPlayerService: ObservableObject {
 
     func play(url: URL) {
         if let current = lastPreviewURL, current != url {
-            stop()
+            stopPlayerOnly()
         }
         lastPreviewURL = url
         let item = AVPlayerItem(url: url)
@@ -41,15 +41,19 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func stop() {
+        stopPlayerOnly()
+        nowPlayingTrack = nil
+        nowPlayingTitle = nil
+        nowPlayingArtist = nil
+        pendingNowPlayingTrack = nil
+    }
+
+    private func stopPlayerOnly() {
         if let player {
             player.pause()
             player.seek(to: .zero)
         }
         player = nil
-        nowPlayingTrack = nil
-        nowPlayingTitle = nil
-        nowPlayingArtist = nil
-        pendingNowPlayingTrack = nil
         state = .stopped
     }
 
