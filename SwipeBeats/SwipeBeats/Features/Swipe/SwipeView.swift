@@ -26,7 +26,11 @@ struct SwipeView: View {
                         .font(.headline)
 
                     Button("Neu laden") {
-                        Task { await viewModel.load(term: selectedTerm) }
+                        if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
+                            Task { await viewModel.load(term: preset.term) }
+                        } else {
+                            Task { await viewModel.load(term: selectedTerm) }
+                        }
                     }
                 }
 
@@ -40,7 +44,11 @@ struct SwipeView: View {
                         .foregroundStyle(.secondary)
 
                     Button("Erneut versuchen") {
-                        Task { await viewModel.load(term: selectedTerm) }
+                        if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
+                            Task { await viewModel.load(term: preset.term) }
+                        } else {
+                            Task { await viewModel.load(term: selectedTerm) }
+                        }
                     }
                 }
 

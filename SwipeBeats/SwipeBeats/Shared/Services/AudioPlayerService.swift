@@ -46,6 +46,10 @@ final class AudioPlayerService: ObservableObject {
             player.seek(to: .zero)
         }
         player = nil
+        nowPlayingTrack = nil
+        nowPlayingTitle = nil
+        nowPlayingArtist = nil
+        pendingNowPlayingTrack = nil
         state = .stopped
     }
 
@@ -95,9 +99,5 @@ final class AudioPlayerService: ObservableObject {
         if let current = nowPlayingTrack, current.previewURL == url {
             return
         }
-
-        nowPlayingTrack = nil
-        nowPlayingTitle = nil
-        nowPlayingArtist = nil
     }
 }
