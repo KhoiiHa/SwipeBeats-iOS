@@ -6,13 +6,14 @@ struct AppRootView: View {
     @StateObject private var audio = AudioPlayerService()
     @State private var nowPlayingDetailTrack: Track?
     @State private var swipeViewModel: SwipeViewModel?
+    @State private var selectedTab: AppTab = .swipe
     private let di = AppDIContainer()
     private let miniPlayerReservedHeight: CGFloat = 68
     private let tabBarHeight: CGFloat = 49
 
     var body: some View {
         GeometryReader { geometry in
-            TabView {
+            TabView(selection: $selectedTab) {
                 NavigationStack {
                     Group {
                         if let swipeViewModel {
@@ -26,6 +27,7 @@ struct AppRootView: View {
                 .tabItem {
                     Label("Swipe", systemImage: "rectangle.stack")
                 }
+                .tag(AppTab.swipe)
 
                 NavigationStack {
                     ExploreView()
@@ -34,6 +36,7 @@ struct AppRootView: View {
                 .tabItem {
                     Label("Explore", systemImage: "magnifyingglass")
                 }
+                .tag(AppTab.explore)
 
                 NavigationStack {
                     LikedListView()
@@ -42,6 +45,7 @@ struct AppRootView: View {
                 .tabItem {
                     Label("Liked", systemImage: "heart.fill")
                 }
+                .tag(AppTab.liked)
             }
             .environmentObject(audio)
             .safeAreaInset(edge: .bottom) {
@@ -76,6 +80,19 @@ struct AppRootView: View {
                     TrackDetailView(track: track, audio: audio)
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { _ in
+                selectedTab = .explore
+            }
         }
     }
+}
+
+private enum AppTab: Hashable {
+    case swipe
+    case explore
+    case liked
+}
+
+extension Notification.Name {
+    static let openExploreArtist = Notification.Name("openExploreArtist")
 }

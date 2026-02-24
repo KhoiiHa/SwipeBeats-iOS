@@ -110,23 +110,29 @@ struct TrackDetailView: View {
                     .padding(.horizontal)
                 }
 
-                if let onExploreArtist {
-                    Button {
-                        dismiss()
+                Button {
+                    dismiss()
+                    if let onExploreArtist {
                         onExploreArtist(track.artistName)
-                    } label: {
-                        Label {
-                            Text("Mehr von \(track.artistName)")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.85)
-                        } icon: {
-                            Image(systemName: "magnifyingglass")
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    } else {
+                        NotificationCenter.default.post(
+                            name: .openExploreArtist,
+                            object: nil,
+                            userInfo: ["artistName": track.artistName]
+                        )
                     }
-                    .buttonStyle(.bordered)
-                    .padding(.horizontal)
+                } label: {
+                    Label {
+                        Text("Mehr von \(track.artistName)")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                    } icon: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
 
                 Spacer(minLength: 12)
             }

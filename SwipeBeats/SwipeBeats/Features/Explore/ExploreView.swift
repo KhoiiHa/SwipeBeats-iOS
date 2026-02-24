@@ -36,6 +36,16 @@ struct ExploreView: View {
         .onChange(of: viewModel.limit) { _, _ in
             Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
+            guard
+                let artistName = notification.userInfo?["artistName"] as? String,
+                !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else { return }
+
+            viewModel.query = artistName
+            let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
+            Task { await viewModel.loadPreset(artistPreset) }
+        }
         .sheet(item: $selectedTrack) { track in
             NavigationStack {
                 TrackDetailView(
