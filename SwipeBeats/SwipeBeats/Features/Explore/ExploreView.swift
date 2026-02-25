@@ -144,7 +144,7 @@ struct ExploreView: View {
             ContentUnavailableView(
                 "Suche starten",
                 systemImage: "magnifyingglass",
-                description: Text("Wähle ein Preset oder gib einen Suchbegriff ein.")
+                description: Text("Preset wählen oder Begriff eingeben.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -156,16 +156,16 @@ struct ExploreView: View {
             ContentUnavailableView(
                 "Keine Treffer",
                 systemImage: "music.note",
-                description: Text("Keine passenden Songs gefunden. Probiere einen anderen Begriff.")
+                description: Text("Bitte anderen Begriff versuchen.")
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .error(let message):
                 VStack(spacing: 12) {
                     ContentUnavailableView(
-                        "Laden fehlgeschlagen",
+                        "Fehler",
                         systemImage: "exclamationmark.triangle",
-                        description: Text(message)
+                        description: Text(message.isEmpty ? "Bitte erneut versuchen." : message)
                     )
                 Button("Erneut versuchen") {
                     Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
@@ -201,7 +201,7 @@ struct ExploreView: View {
                             Button("Verlauf löschen") {
                                 viewModel.clearHistory()
                             }
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
                             .buttonStyle(.plain)
                         }

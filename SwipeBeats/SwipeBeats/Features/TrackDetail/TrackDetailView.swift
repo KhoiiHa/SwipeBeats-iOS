@@ -24,10 +24,11 @@ struct TrackDetailView: View {
     }
 
     private var isCurrentTrackPlaying: Bool {
-        if audio.state != .playing { return false }
-        if let now = audio.nowPlayingTrack, now.id == track.id { return true }
-        if let preview = track.previewURL, let last = audio.lastPreviewURL { return preview == last }
-        return false
+        audio.state == .playing && audio.nowPlayingTrack?.id == track.id
+    }
+
+    private var isCurrentTrackSelected: Bool {
+        audio.nowPlayingTrack?.id == track.id
     }
 
     var body: some View {
@@ -86,7 +87,7 @@ struct TrackDetailView: View {
                             .frame(minWidth: 88, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
-                    .disabled(!isCurrentTrackPlaying)
+                    .disabled(audio.state == .stopped || !isCurrentTrackSelected)
                     .accessibilityLabel("Stop Preview")
 
                     Button {

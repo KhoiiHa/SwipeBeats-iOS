@@ -8,7 +8,7 @@ struct AppRootView: View {
     @State private var swipeViewModel: SwipeViewModel?
     @State private var selectedTab: AppTab = .swipe
     private let di = AppDIContainer()
-    private let miniPlayerReservedHeight: CGFloat = 68
+    private let miniPlayerReservedHeight: CGFloat = 62
     private let tabBarHeight: CGFloat = 49
 
     var body: some View {
