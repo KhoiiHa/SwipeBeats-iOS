@@ -81,6 +81,47 @@ struct ExploreView: View {
                 .disabled(viewModel.state == .loading || viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
+            if !viewModel.recentSearches.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Letzte Suchen")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            viewModel.clearHistory()
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Verlauf löschen")
+                    }
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.recentSearches, id: \.self) { term in
+                                Button {
+                                    Task { await viewModel.useRecent(term) }
+                                } label: {
+                                    Text(term)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                        .minimumScaleFactor(0.9)
+                                        .frame(maxWidth: 220, alignment: .leading)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(.secondary.opacity(0.12), in: Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+            }
+
             HStack(spacing: 12) {
                 Picker("Preset", selection: $selectedPresetId) {
                     ForEach(Constants.searchPresets) { preset in
@@ -176,39 +217,6 @@ struct ExploreView: View {
 
         case .content:
             List {
-                if !viewModel.recentSearches.isEmpty {
-                    Section {
-                        ForEach(viewModel.recentSearches, id: \.self) { term in
-                            Button {
-                                Task { await viewModel.useRecent(term) }
-                            } label: {
-                                HStack {
-                                    Text(term)
-                                        .font(.subheadline)
-                                    Spacer()
-                                }
-                                .padding(.vertical, 8)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    } header: {
-                        HStack {
-                            Text("Letzte Suchen")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Button("Verlauf löschen") {
-                                viewModel.clearHistory()
-                            }
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .buttonStyle(.plain)
-                        }
-                    } footer: {
-                        Divider()
-                    }
-                }
                 ForEach(viewModel.results) { track in
                     let isLiked = viewModel.isLiked(trackId: track.id)
                     Button {
