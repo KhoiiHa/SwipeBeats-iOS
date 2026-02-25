@@ -11,6 +11,11 @@ struct TrackDetailView: View {
 
     @State private var isLiked = false
     @State private var likesStore: LikedTracksStore?
+    @State private var playlistsStore: PlaylistStore?
+    @State private var playlists: [PlaylistEntity] = []
+    @State private var showingAddToPlaylistSheet = false
+    @State private var showingCreatePlaylistAlert = false
+    @State private var newPlaylistName = ""
     let onExploreArtist: ((String) -> Void)?
 
     init(
@@ -112,6 +117,16 @@ struct TrackDetailView: View {
                 }
 
                 Button {
+                    loadPlaylists()
+                    showingAddToPlaylistSheet = true
+                } label: {
+                    Label("Zu Playlist hinzufügen", systemImage: "text.badge.plus")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
+
+                Button {
                     dismiss()
                     if let onExploreArtist {
                         onExploreArtist(track.artistName)
@@ -152,6 +167,71 @@ struct TrackDetailView: View {
             let store = LikedTracksStore(context: modelContext)
             likesStore = store
             isLiked = store.isLiked(trackId: track.id)
+            if playlistsStore == nil {
+                playlistsStore = PlaylistStore(context: modelContext)
+            }
+        }
+        .sheet(isPresented: $showingAddToPlaylistSheet) {
+            NavigationStack {
+                Group {
+                    if playlists.isEmpty {
+                        VStack(spacing: 12) {
+                            ContentUnavailableView(
+                                "Keine Playlists",
+                                systemImage: "music.note.list",
+                                description: Text("Keine Playlists – erstelle eine neue.")
+                            )
+
+                            Button("Neue Playlist erstellen") {
+                                newPlaylistName = ""
+                                showingCreatePlaylistAlert = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .frame(minHeight: 44)
+                        }
+                    } else {
+                        List(playlists, id: \.id) { playlist in
+                            Button {
+                                toggleTrack(in: playlist)
+                                showingAddToPlaylistSheet = false
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Text(playlist.name)
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+
+                                    Spacer()
+
+                                    if playlist.trackIds.contains(track.id) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                .navigationTitle("Playlists")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Schließen") {
+                            showingAddToPlaylistSheet = false
+                        }
+                    }
+                }
+                .alert("Neue Playlist", isPresented: $showingCreatePlaylistAlert) {
+                    TextField("Name", text: $newPlaylistName)
+                    Button("Abbrechen", role: .cancel) {}
+                    Button("Erstellen") {
+                        createPlaylistFromSheet()
+                    }
+                    .disabled(newPlaylistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
         }
     }
 
@@ -164,5 +244,32 @@ struct TrackDetailView: View {
             store.like(track)
             isLiked = true
         }
+    }
+
+    private func loadPlaylists() {
+        if playlistsStore == nil {
+            playlistsStore = PlaylistStore(context: modelContext)
+        }
+        playlists = playlistsStore?.fetchPlaylists() ?? []
+    }
+
+    private func toggleTrack(in playlist: PlaylistEntity) {
+        guard let store = playlistsStore else { return }
+        if playlist.trackIds.contains(track.id) {
+            store.removeTrack(from: playlist.id, trackId: track.id)
+        } else {
+            store.addTrack(to: playlist.id, track: track)
+        }
+    }
+
+    private func createPlaylistFromSheet() {
+        let trimmed = newPlaylistName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        if playlistsStore == nil {
+            playlistsStore = PlaylistStore(context: modelContext)
+        }
+        _ = playlistsStore?.createPlaylist(name: trimmed)
+        loadPlaylists()
+        showingCreatePlaylistAlert = false
     }
 }
