@@ -46,6 +46,15 @@ struct AppRootView: View {
                     Label("Liked", systemImage: "heart.fill")
                 }
                 .tag(AppTab.liked)
+
+                NavigationStack {
+                    PlaylistsView()
+                        .navigationTitle("Playlists")
+                }
+                .tabItem {
+                    Label("Playlists", systemImage: "music.note.list")
+                }
+                .tag(AppTab.playlists)
             }
             .environmentObject(audio)
             .safeAreaInset(edge: .bottom) {
@@ -91,6 +100,7 @@ private enum AppTab: Hashable {
     case swipe
     case explore
     case liked
+    case playlists
 }
 
 extension Notification.Name {
