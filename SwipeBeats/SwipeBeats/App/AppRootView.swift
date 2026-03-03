@@ -89,8 +89,25 @@ struct AppRootView: View {
                     TrackDetailView(track: track, audio: audio)
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
+                guard
+                    let artistName = notification.userInfo?["artistName"] as? String,
+                    !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                    (notification.userInfo?["routed"] as? Bool) != true
+                else { return }
+
                 selectedTab = .explore
+
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(
+                        name: .openExploreArtist,
+                        object: nil,
+                        userInfo: [
+                            "artistName": artistName,
+                            "routed": true
+                        ]
+                    )
+                }
             }
         }
     }

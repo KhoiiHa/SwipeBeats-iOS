@@ -14,6 +14,6 @@ struct SwipeBeatsApp: App {
         WindowGroup {
             AppRootView()
         }
-        .modelContainer(for: LikedTrackEntity.self, PlaylistEntity.self)
+        .modelContainer(for: [LikedTrackEntity.self, PlaylistEntity.self])
     }
 }

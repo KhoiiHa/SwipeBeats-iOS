@@ -67,29 +67,35 @@ final class PlaylistStore {
 
     func addTrack(to playlistId: UUID, track: Track) {
         guard let playlist = findPlaylist(id: playlistId) else { return }
-        guard !playlist.trackIds.contains(track.id) else { return }
+        guard !playlist.tracks.contains(where: { $0.trackId == track.id }) else { return }
 
-        playlist.trackIds.append(track.id)
+        let snapshot = PlaylistTrackSnapshot(
+            trackId: track.id,
+            title: track.trackName,
+            artist: track.artistName,
+            artworkUrl: track.artworkURL?.absoluteString
+        )
+        playlist.tracks.append(snapshot)
 
         do {
             try context.save()
         } catch {
             logger.error("Failed to add track \(track.id) to playlist \(playlistId.uuidString). \(error.localizedDescription)")
-            playlist.trackIds.removeAll { $0 == track.id }
+            playlist.tracks.removeAll { $0.trackId == track.id }
         }
     }
 
     func removeTrack(from playlistId: UUID, trackId: Int) {
         guard let playlist = findPlaylist(id: playlistId) else { return }
-        guard playlist.trackIds.contains(trackId) else { return }
+        guard let removedSnapshot = playlist.tracks.first(where: { $0.trackId == trackId }) else { return }
 
-        playlist.trackIds.removeAll { $0 == trackId }
+        playlist.tracks.removeAll { $0.trackId == trackId }
 
         do {
             try context.save()
         } catch {
             logger.error("Failed to remove track \(trackId) from playlist \(playlistId.uuidString). \(error.localizedDescription)")
-            playlist.trackIds.append(trackId)
+            playlist.tracks.append(removedSnapshot)
         }
     }
 

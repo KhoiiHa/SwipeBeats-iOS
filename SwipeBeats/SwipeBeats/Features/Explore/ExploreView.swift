@@ -39,12 +39,16 @@ struct ExploreView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
             guard
                 let artistName = notification.userInfo?["artistName"] as? String,
+                (notification.userInfo?["routed"] as? Bool) == true,
                 !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             else { return }
 
-            viewModel.query = artistName
-            let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
-            Task { await viewModel.loadPreset(artistPreset) }
+            Task { @MainActor in
+                viewModel.query = artistName
+                let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
+                await Task.yield()
+                await viewModel.loadPreset(artistPreset)
+            }
         }
         .sheet(item: $selectedTrack) { track in
             NavigationStack {

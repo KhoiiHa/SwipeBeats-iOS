@@ -128,14 +128,16 @@ struct TrackDetailView: View {
 
                 Button {
                     dismiss()
-                    if let onExploreArtist {
-                        onExploreArtist(track.artistName)
-                    } else {
-                        NotificationCenter.default.post(
-                            name: .openExploreArtist,
-                            object: nil,
-                            userInfo: ["artistName": track.artistName]
-                        )
+                    DispatchQueue.main.async {
+                        if let onExploreArtist {
+                            onExploreArtist(track.artistName)
+                        } else {
+                            NotificationCenter.default.post(
+                                name: .openExploreArtist,
+                                object: nil,
+                                userInfo: ["artistName": track.artistName]
+                            )
+                        }
                     }
                 } label: {
                     Label {
@@ -202,7 +204,7 @@ struct TrackDetailView: View {
 
                                     Spacer()
 
-                                    if playlist.trackIds.contains(track.id) {
+                                    if playlist.tracks.contains(where: { $0.trackId == track.id }) {
                                         Image(systemName: "checkmark")
                                             .foregroundStyle(.secondary)
                                     }
@@ -255,7 +257,7 @@ struct TrackDetailView: View {
 
     private func toggleTrack(in playlist: PlaylistEntity) {
         guard let store = playlistsStore else { return }
-        if playlist.trackIds.contains(track.id) {
+        if playlist.tracks.contains(where: { $0.trackId == track.id }) {
             store.removeTrack(from: playlist.id, trackId: track.id)
         } else {
             store.addTrack(to: playlist.id, track: track)
