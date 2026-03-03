@@ -15,7 +15,7 @@ final class PlaylistEntity {
     @Attribute(.unique) var id: UUID
     var name: String
     var createdAt: Date
-    @Attribute(.transformable) var tracks: [PlaylistTrackSnapshot]
+    var tracks: [PlaylistTrackSnapshot] = []
 
     init(
         id: UUID = UUID(),

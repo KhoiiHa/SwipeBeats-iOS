@@ -5,10 +5,15 @@ struct ExploreView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
 
+    @Binding private var pendingExploreArtistName: String?
     @StateObject private var viewModel = ExploreViewModel()
 
     @State private var selectedPresetId: String = Constants.defaultSearchPresetId
     @State private var selectedTrack: Track?
+
+    init(pendingExploreArtistName: Binding<String?> = .constant(nil)) {
+        _pendingExploreArtistName = pendingExploreArtistName
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -36,18 +41,19 @@ struct ExploreView: View {
         .onChange(of: viewModel.limit) { _, _ in
             Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
-            guard
-                let artistName = notification.userInfo?["artistName"] as? String,
-                (notification.userInfo?["routed"] as? Bool) == true,
-                !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            else { return }
+        .onChange(of: pendingExploreArtistName) { _, artistName in
+            guard let artistName else { return }
+            let trimmedArtistName = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedArtistName.isEmpty else {
+                pendingExploreArtistName = nil
+                return
+            }
 
             Task { @MainActor in
-                viewModel.query = artistName
-                let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
-                await Task.yield()
+                viewModel.query = trimmedArtistName
+                let artistPreset = SearchPreset(title: trimmedArtistName, term: trimmedArtistName, mode: .artist)
                 await viewModel.loadPreset(artistPreset)
+                pendingExploreArtistName = nil
             }
         }
         .sheet(item: $selectedTrack) { track in

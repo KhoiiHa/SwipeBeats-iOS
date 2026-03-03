@@ -7,6 +7,7 @@ struct AppRootView: View {
     @State private var nowPlayingDetailTrack: Track?
     @State private var swipeViewModel: SwipeViewModel?
     @State private var selectedTab: AppTab = .swipe
+    @State private var pendingExploreArtistName: String?
     private let di = AppDIContainer()
     private let miniPlayerReservedHeight: CGFloat = 62
     private let tabBarHeight: CGFloat = 49
@@ -30,7 +31,7 @@ struct AppRootView: View {
                 .tag(AppTab.swipe)
 
                 NavigationStack {
-                    ExploreView()
+                    ExploreView(pendingExploreArtistName: $pendingExploreArtistName)
                         .navigationTitle("Explore")
                 }
                 .tabItem {
@@ -92,22 +93,11 @@ struct AppRootView: View {
             .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
                 guard
                     let artistName = notification.userInfo?["artistName"] as? String,
-                    !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                    (notification.userInfo?["routed"] as? Bool) != true
+                    !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 else { return }
 
+                pendingExploreArtistName = artistName
                 selectedTab = .explore
-
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(
-                        name: .openExploreArtist,
-                        object: nil,
-                        userInfo: [
-                            "artistName": artistName,
-                            "routed": true
-                        ]
-                    )
-                }
             }
         }
     }
