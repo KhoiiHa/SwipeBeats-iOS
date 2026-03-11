@@ -44,6 +44,7 @@ final class ExploreViewModel: ObservableObject {
     private var likesStore: LikedTracksStore?
     @Published private(set) var likedIds: Set<Int> = []
     private var cancellables = Set<AnyCancellable>()
+    private var suppressNextAutomaticPresetLoad = false
 
     init(service: ITunesSearching? = nil) {
         self.service = service ?? ITunesSearchService()
@@ -73,6 +74,16 @@ final class ExploreViewModel: ObservableObject {
 
     func unlike(trackId: Int) {
         likesStore?.unlike(trackId: trackId)
+    }
+
+    func suppressAutomaticPresetLoadOnce() {
+        suppressNextAutomaticPresetLoad = true
+    }
+
+    func consumeAutomaticPresetLoadSuppression() -> Bool {
+        let shouldSuppress = suppressNextAutomaticPresetLoad
+        suppressNextAutomaticPresetLoad = false
+        return shouldSuppress
     }
 
     func loadPreset(_ preset: SearchPreset) async {

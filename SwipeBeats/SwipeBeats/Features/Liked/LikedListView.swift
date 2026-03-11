@@ -13,6 +13,8 @@ struct LikedListView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
 
+    let onOpenArtistInExplore: (String) -> Void
+
     @Query(sort: \LikedTrackEntity.createdAt, order: .reverse)
     private var likedTracks: [LikedTrackEntity]
 
@@ -46,7 +48,14 @@ struct LikedListView: View {
         }
         .sheet(item: $detailTrack) { track in
             NavigationStack {
-                TrackDetailView(track: track, audio: audio)
+                TrackDetailView(
+                    track: track,
+                    audio: audio,
+                    onOpenArtist: { artistName in
+                        detailTrack = nil
+                        onOpenArtistInExplore(artistName)
+                    }
+                )
             }
         }
     }

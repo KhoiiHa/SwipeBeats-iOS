@@ -5,15 +5,10 @@ struct ExploreView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
 
-    @Binding private var pendingExploreArtistName: String?
-    @StateObject private var viewModel = ExploreViewModel()
+    @ObservedObject var viewModel: ExploreViewModel
 
     @State private var selectedPresetId: String = Constants.defaultSearchPresetId
     @State private var selectedTrack: Track?
-
-    init(pendingExploreArtistName: Binding<String?> = .constant(nil)) {
-        _pendingExploreArtistName = pendingExploreArtistName
-    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -26,6 +21,10 @@ struct ExploreView: View {
             viewModel.configureLikesStore(context: modelContext)
         }
         .task(id: selectedPresetId) {
+            if viewModel.consumeAutomaticPresetLoadSuppression() {
+                return
+            }
+
             if let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) {
                 await viewModel.loadPreset(preset)
             } else {
@@ -41,31 +40,16 @@ struct ExploreView: View {
         .onChange(of: viewModel.limit) { _, _ in
             Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
         }
-        .onChange(of: pendingExploreArtistName) { _, artistName in
-            guard let artistName else { return }
-            let trimmedArtistName = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmedArtistName.isEmpty else {
-                pendingExploreArtistName = nil
-                return
-            }
-
-            Task { @MainActor in
-                viewModel.query = trimmedArtistName
-                let artistPreset = SearchPreset(title: trimmedArtistName, term: trimmedArtistName, mode: .artist)
-                await viewModel.loadPreset(artistPreset)
-                pendingExploreArtistName = nil
-            }
-        }
         .sheet(item: $selectedTrack) { track in
             NavigationStack {
                 TrackDetailView(
                     track: track,
                     audio: audio,
-                    onExploreArtist: { artistName in
-                        // Close the sheet and run a new Explore search for the artist
+                    onOpenArtist: { artistName in
                         selectedTrack = nil
                         viewModel.query = artistName
-                        Task { await viewModel.searchCurrentQuery() }
+                        let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
+                        Task { await viewModel.loadPreset(artistPreset) }
                     }
                 )
             }

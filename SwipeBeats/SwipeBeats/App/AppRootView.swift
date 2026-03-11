@@ -4,10 +4,10 @@ import SwiftData
 struct AppRootView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var audio = AudioPlayerService()
+    @StateObject private var exploreViewModel = ExploreViewModel()
     @State private var nowPlayingDetailTrack: Track?
     @State private var swipeViewModel: SwipeViewModel?
     @State private var selectedTab: AppTab = .swipe
-    @State private var pendingExploreArtistName: String?
     private let di = AppDIContainer()
     private let miniPlayerReservedHeight: CGFloat = 62
     private let tabBarHeight: CGFloat = 49
@@ -18,7 +18,10 @@ struct AppRootView: View {
                 NavigationStack {
                     Group {
                         if let swipeViewModel {
-                            SwipeView(viewModel: swipeViewModel)
+                            SwipeView(
+                                viewModel: swipeViewModel,
+                                onOpenArtistInExplore: openArtistInExplore
+                            )
                         } else {
                             ProgressView("Lade Swipe…")
                         }
@@ -31,7 +34,7 @@ struct AppRootView: View {
                 .tag(AppTab.swipe)
 
                 NavigationStack {
-                    ExploreView(pendingExploreArtistName: $pendingExploreArtistName)
+                    ExploreView(viewModel: exploreViewModel)
                         .navigationTitle("Explore")
                 }
                 .tabItem {
@@ -40,7 +43,7 @@ struct AppRootView: View {
                 .tag(AppTab.explore)
 
                 NavigationStack {
-                    LikedListView()
+                    LikedListView(onOpenArtistInExplore: openArtistInExplore)
                         .navigationTitle("Liked")
                 }
                 .tabItem {
@@ -77,6 +80,7 @@ struct AppRootView: View {
             }
             .animation(.easeInOut(duration: 0.22), value: audio.isPlaying)
             .task {
+                exploreViewModel.configureLikesStore(context: modelContext)
                 if swipeViewModel == nil {
                     swipeViewModel = SwipeViewModel(
                         service: di.iTunes,
@@ -87,19 +91,34 @@ struct AppRootView: View {
             }
             .sheet(item: $nowPlayingDetailTrack) { track in
                 NavigationStack {
-                    TrackDetailView(track: track, audio: audio)
+                    TrackDetailView(
+                        track: track,
+                        audio: audio,
+                        onOpenArtist: { artistName in
+                            nowPlayingDetailTrack = nil
+                            openArtistInExplore(artistName)
+                        }
+                    )
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: .openExploreArtist)) { notification in
-                guard
-                    let artistName = notification.userInfo?["artistName"] as? String,
-                    !artistName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                else { return }
-
-                pendingExploreArtistName = artistName
-                selectedTab = .explore
-            }
         }
+    }
+
+    private func openArtistInExplore(_ artistName: String) {
+        let trimmedArtistName = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedArtistName.isEmpty else { return }
+
+        exploreViewModel.suppressAutomaticPresetLoadOnce()
+        selectedTab = .explore
+        exploreViewModel.query = trimmedArtistName
+
+        let artistPreset = SearchPreset(
+            title: trimmedArtistName,
+            term: trimmedArtistName,
+            mode: .artist
+        )
+
+        Task { await exploreViewModel.loadPreset(artistPreset) }
     }
 }
 
@@ -108,8 +127,4 @@ private enum AppTab: Hashable {
     case explore
     case liked
     case playlists
-}
-
-extension Notification.Name {
-    static let openExploreArtist = Notification.Name("openExploreArtist")
 }

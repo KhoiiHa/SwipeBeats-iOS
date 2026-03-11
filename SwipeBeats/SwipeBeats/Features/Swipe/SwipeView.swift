@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SwipeView: View {
     @StateObject private var viewModel: SwipeViewModel
+    let onOpenArtistInExplore: (String) -> Void
     private let handler = SwipeGestureHandler()
 
     @State private var dragOffset: CGSize = .zero
@@ -9,8 +10,9 @@ struct SwipeView: View {
     @State private var selectedTerm: String = Constants.defaultSearchPresetId
     @State private var detailTrack: Track?
 
-    init(viewModel: SwipeViewModel) {
+    init(viewModel: SwipeViewModel, onOpenArtistInExplore: @escaping (String) -> Void) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.onOpenArtistInExplore = onOpenArtistInExplore
     }
 
 
@@ -126,7 +128,14 @@ struct SwipeView: View {
         }
         .sheet(item: $detailTrack) { track in
             NavigationStack {
-                TrackDetailView(track: track, audio: viewModel.audio)
+                TrackDetailView(
+                    track: track,
+                    audio: viewModel.audio,
+                    onOpenArtist: { artistName in
+                        detailTrack = nil
+                        onOpenArtistInExplore(artistName)
+                    }
+                )
             }
         }
     }

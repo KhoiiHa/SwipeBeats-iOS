@@ -16,16 +16,16 @@ struct TrackDetailView: View {
     @State private var showingAddToPlaylistSheet = false
     @State private var showingCreatePlaylistAlert = false
     @State private var newPlaylistName = ""
-    let onExploreArtist: ((String) -> Void)?
+    let onOpenArtist: (String) -> Void
 
     init(
         track: Track,
         audio: AudioPlayerService,
-        onExploreArtist: ((String) -> Void)? = nil
+        onOpenArtist: @escaping (String) -> Void
     ) {
         self.track = track
         self.audio = audio
-        self.onExploreArtist = onExploreArtist
+        self.onOpenArtist = onOpenArtist
     }
 
     private var isCurrentTrackPlaying: Bool {
@@ -129,15 +129,7 @@ struct TrackDetailView: View {
                 Button {
                     dismiss()
                     DispatchQueue.main.async {
-                        if let onExploreArtist {
-                            onExploreArtist(track.artistName)
-                        } else {
-                            NotificationCenter.default.post(
-                                name: .openExploreArtist,
-                                object: nil,
-                                userInfo: ["artistName": track.artistName]
-                            )
-                        }
+                        onOpenArtist(track.artistName)
                     }
                 } label: {
                     Label {
