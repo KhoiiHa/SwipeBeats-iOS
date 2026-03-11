@@ -22,17 +22,29 @@ struct PlaylistDetailView: View {
                         description: Text("Diese Playlist enthält noch keine Tracks.")
                     )
                 } else {
-                    List {
-                        ForEach(playlist.tracks) { snapshot in
-                            Button {
-                                play(snapshot)
-                            } label: {
-                                row(for: snapshot)
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(snapshot.previewURL == nil)
+                    VStack(spacing: 12) {
+                        Button {
+                            playFirstAvailableTrack(in: playlist)
+                        } label: {
+                            Label("Playlist abspielen", systemImage: "play.fill")
+                                .frame(maxWidth: .infinity, minHeight: 44)
                         }
-                        .onDelete(perform: removeTracks)
+                        .buttonStyle(.borderedProminent)
+                        .disabled(firstPlayableTrack(in: playlist) == nil)
+                        .padding(.horizontal)
+
+                        List {
+                            ForEach(playlist.tracks) { snapshot in
+                                Button {
+                                    play(snapshot)
+                                } label: {
+                                    row(for: snapshot)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(snapshot.previewURL == nil)
+                            }
+                            .onDelete(perform: removeTracks)
+                        }
                     }
                 }
             } else {
@@ -173,5 +185,17 @@ struct PlaylistDetailView: View {
 
         audio.setNowPlaying(track: track)
         audio.toggle(url: previewURL)
+    }
+
+    private func firstPlayableTrack(in playlist: PlaylistEntity) -> PlaylistTrackSnapshot? {
+        playlist.tracks.first { snapshot in
+            guard let previewURL = snapshot.previewURL else { return false }
+            return URL(string: previewURL) != nil
+        }
+    }
+
+    private func playFirstAvailableTrack(in playlist: PlaylistEntity) {
+        guard let snapshot = firstPlayableTrack(in: playlist) else { return }
+        play(snapshot)
     }
 }
