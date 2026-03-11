@@ -3,6 +3,7 @@ import SwiftData
 
 struct PlaylistDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var audio: AudioPlayerService
 
     let playlistId: UUID
 
@@ -23,7 +24,13 @@ struct PlaylistDetailView: View {
                 } else {
                     List {
                         ForEach(playlist.tracks) { snapshot in
-                            row(for: snapshot)
+                            Button {
+                                play(snapshot)
+                            } label: {
+                                row(for: snapshot)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(snapshot.previewURL == nil)
                         }
                         .onDelete(perform: removeTracks)
                     }
@@ -107,8 +114,15 @@ struct PlaylistDetailView: View {
             }
 
             Spacer()
+
+            Image(systemName: "play.fill")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .opacity(snapshot.previewURL == nil ? 0.3 : 1)
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .opacity(snapshot.previewURL == nil ? 0.6 : 1)
     }
 
     @ViewBuilder
@@ -141,5 +155,23 @@ struct PlaylistDetailView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
+    }
+
+    private func play(_ snapshot: PlaylistTrackSnapshot) {
+        guard let previewURLString = snapshot.previewURL,
+              let previewURL = URL(string: previewURLString) else { return }
+
+        let track = Track(
+            id: snapshot.trackId,
+            artistName: snapshot.artist,
+            trackName: snapshot.title,
+            artworkURL: snapshot.artworkUrl.flatMap(URL.init(string:)),
+            previewURL: previewURL,
+            collectionViewURL: nil,
+            primaryGenreName: nil
+        )
+
+        audio.setNowPlaying(track: track)
+        audio.toggle(url: previewURL)
     }
 }
