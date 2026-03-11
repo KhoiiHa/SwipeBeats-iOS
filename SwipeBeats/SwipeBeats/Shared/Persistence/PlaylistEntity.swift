@@ -6,6 +6,7 @@ struct PlaylistTrackSnapshot: Codable, Hashable, Identifiable {
     var title: String
     var artist: String
     var artworkUrl: String?
+    var previewURL: String?
 
     var id: Int { trackId }
 }

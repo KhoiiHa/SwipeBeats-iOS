@@ -73,7 +73,8 @@ final class PlaylistStore {
             trackId: track.id,
             title: track.trackName,
             artist: track.artistName,
-            artworkUrl: track.artworkURL?.absoluteString
+            artworkUrl: track.artworkURL?.absoluteString,
+            previewURL: track.previewURL?.absoluteString
         )
         playlist.tracks.append(snapshot)
 
