@@ -8,6 +8,7 @@ struct TrackDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var toastManager: ToastManager
 
     @State private var isLiked = false
     @State private var likesStore: LikedTracksStore?
@@ -150,6 +151,9 @@ struct TrackDetailView: View {
         }
         .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
+        .overlay(alignment: .bottom) {
+            toastOverlay(bottomPadding: 12)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Fertig") {
@@ -215,6 +219,9 @@ struct TrackDetailView: View {
                 }
                 .navigationTitle("Playlists")
                 .navigationBarTitleDisplayMode(.inline)
+                .overlay(alignment: .bottom) {
+                    toastOverlay(bottomPadding: 12)
+                }
                 .onAppear {
                     loadPlaylists()
                 }
@@ -242,9 +249,11 @@ struct TrackDetailView: View {
         if isLiked {
             store.unlike(trackId: track.id)
             isLiked = false
+            toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
         } else {
             store.like(track)
             isLiked = true
+            toastManager.show("Zu Favoriten hinzugefuegt", icon: "heart.fill")
         }
     }
 
@@ -259,8 +268,10 @@ struct TrackDetailView: View {
         guard let store = playlistsStore else { return }
         if playlist.tracks.contains(where: { $0.trackId == track.id }) {
             store.removeTrack(from: playlist.id, trackId: track.id)
+            toastManager.show("Aus Playlist entfernt", icon: "minus.circle")
         } else {
             store.addTrack(to: playlist.id, track: track)
+            toastManager.show("Zur Playlist hinzugefuegt", icon: "checkmark.circle")
         }
     }
 
@@ -277,5 +288,16 @@ struct TrackDetailView: View {
         }
         newPlaylistName = ""
         showingCreatePlaylistAlert = false
+        toastManager.show("Playlist erstellt", icon: "checkmark.circle")
+    }
+
+    @ViewBuilder
+    private func toastOverlay(bottomPadding: CGFloat) -> some View {
+        if let toast = toastManager.toast {
+            ToastView(toast: toast)
+                .padding(.horizontal, 12)
+                .padding(.bottom, bottomPadding)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
     }
 }

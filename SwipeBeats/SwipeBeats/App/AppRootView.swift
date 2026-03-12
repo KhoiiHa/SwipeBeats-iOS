@@ -5,6 +5,7 @@ struct AppRootView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var audio = AudioPlayerService()
     @StateObject private var exploreViewModel = ExploreViewModel()
+    @StateObject private var toastManager = ToastManager()
     @State private var nowPlayingDetailTrack: Track?
     @State private var swipeViewModel: SwipeViewModel?
     @State private var selectedTab: AppTab = .swipe
@@ -61,24 +62,40 @@ struct AppRootView: View {
                 .tag(AppTab.playlists)
             }
             .environmentObject(audio)
+            .environmentObject(toastManager)
             .safeAreaInset(edge: .bottom) {
                 if audio.isPlaying {
                     Color.clear.frame(height: miniPlayerReservedHeight + 8)
                 }
             }
             .overlay(alignment: .bottom) {
-                if audio.isPlaying {
-                    MiniPlayerBar(audio: audio) {
-                        if let track = audio.nowPlayingTrack {
-                            nowPlayingDetailTrack = track
-                        }
+                ZStack(alignment: .bottom) {
+                    if let toast = toastManager.toast {
+                        ToastView(toast: toast)
+                            .padding(.horizontal, 12)
+                            .padding(
+                                .bottom,
+                                geometry.safeAreaInsets.bottom
+                                    + tabBarHeight
+                                    + (audio.isPlaying ? miniPlayerReservedHeight + 16 : 8)
+                            )
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, geometry.safeAreaInsets.bottom + tabBarHeight + 8)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+
+                    if audio.isPlaying {
+                        MiniPlayerBar(audio: audio) {
+                            if let track = audio.nowPlayingTrack {
+                                nowPlayingDetailTrack = track
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, geometry.safeAreaInsets.bottom + tabBarHeight + 8)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
             }
             .animation(.easeInOut(duration: 0.22), value: audio.isPlaying)
+            .animation(.easeInOut(duration: 0.22), value: toastManager.toast)
             .task {
                 exploreViewModel.configureLikesStore(context: modelContext)
                 if swipeViewModel == nil {

@@ -4,6 +4,7 @@ struct ExploreView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
+    @EnvironmentObject private var toastManager: ToastManager
 
     @ObservedObject var viewModel: ExploreViewModel
 
@@ -223,11 +224,7 @@ struct ExploreView: View {
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button {
-                                if isLiked {
-                                    viewModel.unlike(trackId: track.id)
-                                } else {
-                                    viewModel.like(track)
-                                }
+                                toggleLike(track, isLiked: isLiked)
                             } label: {
                                 if isLiked {
                                     Label("Like entfernen", systemImage: "heart.slash")
@@ -254,11 +251,7 @@ struct ExploreView: View {
                             }
 
                             Button {
-                                if isLiked {
-                                    viewModel.unlike(trackId: track.id)
-                                } else {
-                                    viewModel.like(track)
-                                }
+                                toggleLike(track, isLiked: isLiked)
                             } label: {
                                 if isLiked {
                                     Label("Like entfernen", systemImage: "heart.slash")
@@ -282,6 +275,16 @@ struct ExploreView: View {
                     await viewModel.searchCurrentQuery(forceKeyword: false)
                 }
             }
+        }
+    }
+
+    private func toggleLike(_ track: Track, isLiked: Bool) {
+        if isLiked {
+            viewModel.unlike(trackId: track.id)
+            toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
+        } else {
+            viewModel.like(track)
+            toastManager.show("Zu Favoriten hinzugefügt", icon: "heart.fill")
         }
     }
 }

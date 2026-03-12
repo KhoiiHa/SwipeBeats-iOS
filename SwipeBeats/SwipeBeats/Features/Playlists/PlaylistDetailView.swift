@@ -4,6 +4,7 @@ import SwiftData
 struct PlaylistDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var audio: AudioPlayerService
+    @EnvironmentObject private var toastManager: ToastManager
 
     let playlist: PlaylistEntity
 
@@ -80,6 +81,7 @@ struct PlaylistDetailView: View {
         guard !trimmed.isEmpty else { return }
         ensureStore()
         store?.renamePlaylist(id: playlist.id, newName: trimmed)
+        toastManager.show("Playlist umbenannt", icon: "pencil")
     }
 
     private func removeTracks(at offsets: IndexSet) {
@@ -87,6 +89,9 @@ struct PlaylistDetailView: View {
         for index in offsets {
             let snapshot = playlist.tracks[index]
             store.removeTrack(from: playlist.id, trackId: snapshot.trackId)
+        }
+        if !offsets.isEmpty {
+            toastManager.show("Aus Playlist entfernt", icon: "minus.circle")
         }
     }
 

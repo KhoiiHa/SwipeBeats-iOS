@@ -12,6 +12,7 @@ struct LikedListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
+    @EnvironmentObject private var toastManager: ToastManager
 
     let onOpenArtistInExplore: (String) -> Void
 
@@ -127,6 +128,9 @@ struct LikedListView: View {
     private func delete(at offsets: IndexSet) {
         for index in offsets {
             likesStore.unlike(trackId: likedTracks[index].trackId)
+        }
+        if !offsets.isEmpty {
+            toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
         }
     }
 

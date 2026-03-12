@@ -3,6 +3,7 @@ import SwiftData
 
 struct PlaylistsView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var toastManager: ToastManager
 
     @State private var store: PlaylistStore?
     @State private var playlists: [PlaylistEntity] = []
@@ -99,6 +100,7 @@ struct PlaylistsView: View {
         _ = store?.createPlaylist(name: trimmedNewPlaylistName)
         showingCreateSheet = false
         reloadPlaylists()
+        toastManager.show("Playlist erstellt", icon: "checkmark.circle")
     }
 
     private func deletePlaylists(at offsets: IndexSet) {
@@ -108,5 +110,8 @@ struct PlaylistsView: View {
             store.deletePlaylist(id: playlists[index].id)
         }
         reloadPlaylists()
+        if !offsets.isEmpty {
+            toastManager.show("Playlist gelöscht", icon: "trash")
+        }
     }
 }
