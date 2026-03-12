@@ -5,65 +5,55 @@ struct PlaylistDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var audio: AudioPlayerService
 
-    let playlistId: UUID
+    let playlist: PlaylistEntity
 
     @State private var store: PlaylistStore?
-    @State private var playlist: PlaylistEntity?
     @State private var renameText = ""
     @State private var showingRenameAlert = false
 
     var body: some View {
         Group {
-            if let playlist {
-                if playlist.tracks.isEmpty {
-                    ContentUnavailableView(
-                        "Leere Playlist",
-                        systemImage: "music.note",
-                        description: Text("Diese Playlist enthält noch keine Tracks.")
-                    )
-                } else {
-                    VStack(spacing: 12) {
-                        Button {
-                            playFirstAvailableTrack(in: playlist)
-                        } label: {
-                            Label("Playlist abspielen", systemImage: "play.fill")
-                                .frame(maxWidth: .infinity, minHeight: 44)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(firstPlayableTrack(in: playlist) == nil)
-                        .padding(.horizontal)
+            if playlist.tracks.isEmpty {
+                ContentUnavailableView(
+                    "Leere Playlist",
+                    systemImage: "music.note",
+                    description: Text("Diese Playlist enthält noch keine Tracks.")
+                )
+            } else {
+                VStack(spacing: 12) {
+                    Button {
+                        playFirstAvailableTrack(in: playlist)
+                    } label: {
+                        Label("Playlist abspielen", systemImage: "play.fill")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(firstPlayableTrack(in: playlist) == nil)
+                    .padding(.horizontal)
 
-                        List {
-                            ForEach(playlist.tracks) { snapshot in
-                                Button {
-                                    play(snapshot)
-                                } label: {
-                                    row(for: snapshot)
-                                }
-                                .buttonStyle(.plain)
-                                .disabled(snapshot.previewURL == nil)
+                    List {
+                        ForEach(playlist.tracks) { snapshot in
+                            Button {
+                                play(snapshot)
+                            } label: {
+                                row(for: snapshot)
                             }
-                            .onDelete(perform: removeTracks)
+                            .buttonStyle(.plain)
+                            .disabled(snapshot.previewURL == nil)
                         }
+                        .onDelete(perform: removeTracks)
                     }
                 }
-            } else {
-                ContentUnavailableView(
-                    "Playlist nicht gefunden",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text("Bitte gehe zurück und versuche es erneut.")
-                )
             }
         }
-        .navigationTitle(playlist?.name ?? "Playlist")
+        .navigationTitle(playlist.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Umbenennen") {
-                    renameText = playlist?.name ?? ""
+                    renameText = playlist.name
                     showingRenameAlert = true
                 }
-                .disabled(playlist == nil)
             }
         }
         .alert("Playlist umbenennen", isPresented: $showingRenameAlert) {
@@ -76,7 +66,6 @@ struct PlaylistDetailView: View {
         }
         .onAppear {
             ensureStore()
-            loadPlaylist()
         }
     }
 
@@ -86,26 +75,19 @@ struct PlaylistDetailView: View {
         }
     }
 
-    private func loadPlaylist() {
-        ensureStore()
-        playlist = store?.fetchPlaylists().first(where: { $0.id == playlistId })
-    }
-
     private func renamePlaylist() {
         let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         ensureStore()
-        store?.renamePlaylist(id: playlistId, newName: trimmed)
-        loadPlaylist()
+        store?.renamePlaylist(id: playlist.id, newName: trimmed)
     }
 
     private func removeTracks(at offsets: IndexSet) {
-        guard let playlist, let store else { return }
+        guard let store else { return }
         for index in offsets {
             let snapshot = playlist.tracks[index]
             store.removeTrack(from: playlist.id, trackId: snapshot.trackId)
         }
-        loadPlaylist()
     }
 
     private func row(for snapshot: PlaylistTrackSnapshot) -> some View {

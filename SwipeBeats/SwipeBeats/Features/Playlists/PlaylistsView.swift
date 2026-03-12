@@ -21,7 +21,7 @@ struct PlaylistsView: View {
                 List {
                     ForEach(playlists, id: \.id) { playlist in
                         NavigationLink {
-                            PlaylistDetailView(playlistId: playlist.id)
+                            PlaylistDetailView(playlist: playlist)
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(playlist.name)

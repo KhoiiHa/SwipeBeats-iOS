@@ -165,6 +165,11 @@ struct TrackDetailView: View {
                 playlistsStore = PlaylistStore(context: modelContext)
             }
         }
+        .onChange(of: showingAddToPlaylistSheet) { _, isPresented in
+            if isPresented {
+                loadPlaylists()
+            }
+        }
         .sheet(isPresented: $showingAddToPlaylistSheet) {
             NavigationStack {
                 Group {
@@ -210,6 +215,9 @@ struct TrackDetailView: View {
                 }
                 .navigationTitle("Playlists")
                 .navigationBarTitleDisplayMode(.inline)
+                .onAppear {
+                    loadPlaylists()
+                }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Schließen") {
@@ -262,8 +270,12 @@ struct TrackDetailView: View {
         if playlistsStore == nil {
             playlistsStore = PlaylistStore(context: modelContext)
         }
-        _ = playlistsStore?.createPlaylist(name: trimmed)
-        loadPlaylists()
+        guard let store = playlistsStore else { return }
+        let createdPlaylist = store.createPlaylist(name: trimmed)
+        if !playlists.contains(where: { $0.id == createdPlaylist.id }) {
+            playlists.insert(createdPlaylist, at: 0)
+        }
+        newPlaylistName = ""
         showingCreatePlaylistAlert = false
     }
 }
