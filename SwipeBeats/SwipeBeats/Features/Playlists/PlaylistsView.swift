@@ -5,8 +5,10 @@ struct PlaylistsView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var toastManager: ToastManager
 
+    @Query(sort: \PlaylistEntity.createdAt, order: .reverse)
+    private var playlists: [PlaylistEntity]
+
     @State private var store: PlaylistStore?
-    @State private var playlists: [PlaylistEntity] = []
     @State private var showingCreateSheet = false
     @State private var newPlaylistName = ""
 
@@ -74,10 +76,6 @@ struct PlaylistsView: View {
                 }
             }
         }
-        .onAppear {
-            ensureStore()
-            reloadPlaylists()
-        }
     }
 
     private var trimmedNewPlaylistName: String {
@@ -90,16 +88,10 @@ struct PlaylistsView: View {
         }
     }
 
-    private func reloadPlaylists() {
-        ensureStore()
-        playlists = store?.fetchPlaylists() ?? []
-    }
-
     private func createPlaylist() {
         ensureStore()
         _ = store?.createPlaylist(name: trimmedNewPlaylistName)
         showingCreateSheet = false
-        reloadPlaylists()
         toastManager.show("Playlist erstellt", icon: "checkmark.circle")
     }
 
@@ -109,7 +101,6 @@ struct PlaylistsView: View {
         for index in offsets {
             store.deletePlaylist(id: playlists[index].id)
         }
-        reloadPlaylists()
         if !offsets.isEmpty {
             toastManager.show("Playlist gelöscht", icon: "trash")
         }
