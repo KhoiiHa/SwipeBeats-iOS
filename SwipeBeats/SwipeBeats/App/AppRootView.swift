@@ -45,10 +45,10 @@ struct AppRootView: View {
 
                 NavigationStack {
                     LikedListView(onOpenArtistInExplore: openArtistInExplore)
-                        .navigationTitle("Liked")
+                        .navigationTitle("Favoriten")
                 }
                 .tabItem {
-                    Label("Liked", systemImage: "heart.fill")
+                    Label("Favoriten", systemImage: "heart.fill")
                 }
                 .tag(AppTab.liked)
 

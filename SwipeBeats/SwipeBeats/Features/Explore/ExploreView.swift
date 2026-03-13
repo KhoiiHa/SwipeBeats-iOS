@@ -130,6 +130,8 @@ struct ExploreView: View {
                                         .background(.secondary.opacity(0.12), in: Capsule())
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Letzte Suche: \(term)")
+                                .accessibilityHint("Führt diese Suche erneut aus")
                             }
                         }
                     }
@@ -165,7 +167,7 @@ struct ExploreView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 12) {
-                    Toggle("Nur mit Preview", isOn: $viewModel.onlyWithPreview)
+                    Toggle("Nur mit Vorschau", isOn: $viewModel.onlyWithPreview)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
 
@@ -247,14 +249,15 @@ struct ExploreView: View {
                             .padding(.vertical, 4)
                     }
                         .buttonStyle(.plain)
+                        .accessibilityHint("Öffnet die Track-Details")
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button {
                                 toggleLike(track, isLiked: isLiked)
                             } label: {
                                 if isLiked {
-                                    Label("Like entfernen", systemImage: "heart.slash")
+                                    Label("Aus Favoriten entfernen", systemImage: "heart.slash")
                                 } else {
-                                    Label("Like", systemImage: "heart")
+                                    Label("Zu Favoriten hinzufügen", systemImage: "heart")
                                 }
                             }
                             .tint(isLiked ? .gray : .pink)
@@ -263,7 +266,7 @@ struct ExploreView: View {
                                 Button {
                                     openURL(url)
                                 } label: {
-                                    Label("Apple Music", systemImage: "arrow.up.right.square")
+                                    Label("In Apple Music öffnen", systemImage: "arrow.up.right.square")
                                 }
                                 .tint(.blue)
                             }
@@ -279,9 +282,9 @@ struct ExploreView: View {
                                 toggleLike(track, isLiked: isLiked)
                             } label: {
                                 if isLiked {
-                                    Label("Like entfernen", systemImage: "heart.slash")
+                                    Label("Aus Favoriten entfernen", systemImage: "heart.slash")
                                 } else {
-                                    Label("Like", systemImage: "heart")
+                                    Label("Zu Favoriten hinzufügen", systemImage: "heart")
                                 }
                             }
 
@@ -289,7 +292,7 @@ struct ExploreView: View {
                                 Button {
                                     openURL(url)
                                 } label: {
-                                    Label("Apple Music", systemImage: "arrow.up.right.square")
+                                    Label("In Apple Music öffnen", systemImage: "arrow.up.right.square")
                                 }
                             }
                         }

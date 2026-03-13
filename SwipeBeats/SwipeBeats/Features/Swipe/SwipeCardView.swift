@@ -52,9 +52,9 @@ struct SwipeCardView: View {
                     .font(.system(size: 28, weight: .semibold))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(isCurrentTrackPlaying ? "Preview pausieren" : "Preview abspielen")
+                    Text(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
                         .font(.headline)
-                    Text("30s Vorschau")
+                    Text("30 Sek. Vorschau")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -69,7 +69,8 @@ struct SwipeCardView: View {
         .buttonStyle(.plain)
         .disabled(track.previewURL == nil)
         .opacity(track.previewURL == nil ? 0.5 : 1)
-        .accessibilityLabel("Audio Preview")
+        .accessibilityLabel(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
+        .accessibilityHint(track.previewURL == nil ? "Für diesen Track ist keine Vorschau verfügbar" : "Spielt eine 30 Sekunden Vorschau ab")
     }
 
     private var isCurrentTrackPlaying: Bool {

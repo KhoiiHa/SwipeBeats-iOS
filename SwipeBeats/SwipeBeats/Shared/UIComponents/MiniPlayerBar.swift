@@ -31,6 +31,8 @@ struct MiniPlayerBar: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
+            .accessibilityLabel(audio.isPlaying ? "Wiedergabe pausieren" : "Wiedergabe starten")
+            .accessibilityHint("Steuert die aktuelle Vorschau")
 
             Button {
                 audio.stop()
@@ -40,6 +42,8 @@ struct MiniPlayerBar: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
+            .accessibilityLabel("Wiedergabe stoppen")
+            .accessibilityHint("Beendet die aktuelle Vorschau")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
@@ -47,6 +51,8 @@ struct MiniPlayerBar: View {
         .onTapGesture {
             onTap?()
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityHint("Öffnet den aktuell gespielten Track")
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)

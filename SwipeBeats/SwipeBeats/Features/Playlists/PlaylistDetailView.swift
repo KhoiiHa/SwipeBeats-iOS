@@ -31,6 +31,8 @@ struct PlaylistDetailView: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(firstPlayableTrack(in: playlist) == nil)
                     .padding(.horizontal)
+                    .accessibilityLabel("Playlist abspielen")
+                    .accessibilityHint("Startet den ersten abspielbaren Track der Playlist")
 
                     List {
                         ForEach(playlist.tracks) { snapshot in
@@ -41,6 +43,8 @@ struct PlaylistDetailView: View {
                             }
                             .buttonStyle(.plain)
                             .disabled(snapshot.previewURL == nil)
+                            .accessibilityLabel("\(snapshot.title) von \(snapshot.artist)")
+                            .accessibilityHint(snapshot.previewURL == nil ? "Keine Vorschau verfügbar" : "Spielt die Vorschau dieses Tracks ab")
                         }
                         .onDelete(perform: removeTracks)
                     }
@@ -55,6 +59,7 @@ struct PlaylistDetailView: View {
                     renameText = playlist.name
                     showingRenameAlert = true
                 }
+                .accessibilityLabel("Playlist umbenennen")
             }
         }
         .alert("Playlist umbenennen", isPresented: $showingRenameAlert) {

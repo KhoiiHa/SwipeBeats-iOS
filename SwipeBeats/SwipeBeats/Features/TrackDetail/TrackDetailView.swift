@@ -82,32 +82,34 @@ struct TrackDetailView: View {
                         audio.toggle(url: track.previewURL)
                     } label: {
                         Label(
-                            isCurrentTrackPlaying ? "Pause" : "Play",
+                            isCurrentTrackPlaying ? "Pausieren" : "Abspielen",
                             systemImage: isCurrentTrackPlaying ? "pause.fill" : "play.fill"
                         )
                         .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(track.previewURL == nil)
-                    .accessibilityLabel(isCurrentTrackPlaying ? "Pause Preview" : "Play Preview")
+                    .accessibilityLabel(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
+                    .accessibilityHint(track.previewURL == nil ? "Für diesen Track ist keine Vorschau verfügbar" : "Spielt eine 30 Sekunden Vorschau ab")
 
                     Button {
                         audio.stop()
                     } label: {
-                        Label("Stop", systemImage: "stop.fill")
+                        Label("Stoppen", systemImage: "stop.fill")
                             .frame(minWidth: 88, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
                     .disabled(audio.state == .stopped || !isCurrentTrackSelected)
-                    .accessibilityLabel("Stop Preview")
+                    .accessibilityLabel("Vorschau stoppen")
 
                     Button {
                         toggleLike()
                     } label: {
-                        Label(isLiked ? "Liked" : "Like", systemImage: isLiked ? "heart.fill" : "heart")
+                        Label(isLiked ? "Favorisiert" : "Zu Favoriten", systemImage: isLiked ? "heart.fill" : "heart")
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel(isLiked ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen")
                 }
                 .padding(.horizontal)
 
@@ -120,6 +122,7 @@ struct TrackDetailView: View {
                     }
                     .buttonStyle(.bordered)
                     .padding(.horizontal)
+                    .accessibilityHint("Öffnet den Track in Apple Music")
                 }
 
                 Button {
@@ -131,6 +134,7 @@ struct TrackDetailView: View {
                 }
                 .buttonStyle(.bordered)
                 .padding(.horizontal)
+                .accessibilityHint("Öffnet eine Playlist-Auswahl")
 
                 Button {
                     dismiss()
@@ -149,6 +153,7 @@ struct TrackDetailView: View {
                 }
                 .buttonStyle(.bordered)
                 .padding(.horizontal)
+                .accessibilityHint("Startet eine Artist-Suche in Explore")
 
                 Spacer(minLength: 12)
             }
@@ -164,6 +169,7 @@ struct TrackDetailView: View {
                 Button("Fertig") {
                     dismiss()
                 }
+                .accessibilityLabel("Details schließen")
             }
         }
         .task {
@@ -199,6 +205,7 @@ struct TrackDetailView: View {
                             }
                             .buttonStyle(.borderedProminent)
                             .frame(minHeight: 44)
+                            .accessibilityHint("Öffnet den Dialog zum Erstellen einer Playlist")
                         }
                     } else {
                         List(playlists, id: \.id) { playlist in
@@ -222,6 +229,8 @@ struct TrackDetailView: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(playlist.name)
+                            .accessibilityHint("Fügt den Track zu dieser Playlist hinzu oder entfernt ihn daraus")
                         }
                     }
                 }
@@ -238,6 +247,7 @@ struct TrackDetailView: View {
                         Button("Schließen") {
                             showingAddToPlaylistSheet = false
                         }
+                        .accessibilityLabel("Playlist-Auswahl schließen")
                     }
                 }
                 .alert("Neue Playlist", isPresented: $showingCreatePlaylistAlert) {
@@ -260,7 +270,7 @@ struct TrackDetailView: View {
             toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
         } else {
             store.like(track)
-            toastManager.show("Zu Favoriten hinzugefuegt", icon: "heart.fill")
+            toastManager.show("Zu Favoriten hinzugefügt", icon: "heart.fill")
         }
     }
 
@@ -278,7 +288,7 @@ struct TrackDetailView: View {
             toastManager.show("Aus Playlist entfernt", icon: "minus.circle")
         } else {
             store.addTrack(to: playlist.id, track: track)
-            toastManager.show("Zur Playlist hinzugefuegt", icon: "checkmark.circle")
+            toastManager.show("Zur Playlist hinzugefügt", icon: "checkmark.circle")
         }
     }
 

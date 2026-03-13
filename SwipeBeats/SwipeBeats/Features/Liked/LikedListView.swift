@@ -42,6 +42,8 @@ struct LikedListView: View {
                             row(item)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("\(item.trackName) von \(item.artistName)")
+                        .accessibilityHint("Öffnet die Track-Details")
                     }
                     .onDelete(perform: delete)
                 }

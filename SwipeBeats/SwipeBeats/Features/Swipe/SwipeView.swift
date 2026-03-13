@@ -20,7 +20,7 @@ struct SwipeView: View {
         ZStack {
             switch viewModel.state {
             case .loading:
-                ProgressView("Loading tracks…")
+                ProgressView("Tracks werden geladen…")
 
             case .empty:
                 VStack(spacing: 12) {
@@ -77,6 +77,8 @@ struct SwipeView: View {
                                     .font(.title2)
                                     .symbolRenderingMode(.hierarchical)
                             }
+                            .accessibilityLabel("Track-Details öffnen")
+                            .accessibilityHint("Zeigt weitere Informationen zum aktuellen Track")
                             .padding(.trailing, 26)
                             .padding(.top, 18)
 
@@ -88,18 +90,20 @@ struct SwipeView: View {
                             Button {
                                 Task { await animateOutAndAdvance(.skip) }
                             } label: {
-                                Label("Skip", systemImage: "xmark")
+                                Label("Überspringen", systemImage: "xmark")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.bordered)
+                            .accessibilityLabel("Track überspringen")
 
                             Button {
                                 Task { await animateOutAndAdvance(.like) }
                             } label: {
-                                Label("Like", systemImage: "heart.fill")
+                                Label("Favorit", systemImage: "heart.fill")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent)
+                            .accessibilityLabel("Zu Favoriten hinzufügen")
                         }
                         .padding(.horizontal)
                     }
