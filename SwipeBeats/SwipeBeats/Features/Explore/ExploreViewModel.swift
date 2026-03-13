@@ -5,6 +5,11 @@ import SwiftData
 
 @MainActor
 final class ExploreViewModel: ObservableObject {
+    enum SearchContext: Equatable {
+        case preset(String)
+        case manual
+        case externalArtist
+    }
 
     enum ViewState: Equatable {
         case idle
@@ -30,6 +35,7 @@ final class ExploreViewModel: ObservableObject {
     @Published private(set) var lastSearchedTerm: String = ""
     @Published private(set) var results: [Track] = []
     @Published private(set) var allResults: [Track] = []
+    @Published private(set) var currentSearchContext: SearchContext = .preset(Constants.defaultSearchPresetId)
 
     private let service: ITunesSearching
     private var lastSearchMode: SearchPreset.Mode = .keyword
@@ -92,6 +98,19 @@ final class ExploreViewModel: ObservableObject {
         await search(term: preset.term, mode: preset.mode, genreId: preset.genreId, allowedPrimaryGenres: preset.allowedPrimaryGenres)
     }
 
+    func loadPreset(_ preset: SearchPreset, presetId: String) async {
+        currentSearchContext = .preset(presetId)
+        await loadPreset(preset)
+    }
+
+    func runExternalArtistSearch(_ artistName: String) async {
+        let trimmedArtistName = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedArtistName.isEmpty else { return }
+        query = trimmedArtistName
+        currentSearchContext = .externalArtist
+        await search(term: trimmedArtistName, mode: .artist)
+    }
+
     func searchCurrentQuery(forceKeyword: Bool = true) async {
         let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else {
@@ -101,6 +120,7 @@ final class ExploreViewModel: ObservableObject {
             state = .idle
             return
         }
+        currentSearchContext = .manual
         if forceKeyword {
             lastSearchMode = .keyword
             await search(term: term, mode: .keyword)
@@ -155,6 +175,7 @@ final class ExploreViewModel: ObservableObject {
 
     func useRecent(_ term: String) async {
         query = term
+        currentSearchContext = .manual
         if let entry = recentSearchEntries.first(where: { parseEntry($0).term.caseInsensitiveCompare(term) == .orderedSame }) {
             let parsed = parseEntry(entry)
             lastSearchMode = parsed.mode

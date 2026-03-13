@@ -127,15 +127,7 @@ struct AppRootView: View {
 
         exploreViewModel.suppressAutomaticPresetLoadOnce()
         selectedTab = .explore
-        exploreViewModel.query = trimmedArtistName
-
-        let artistPreset = SearchPreset(
-            title: trimmedArtistName,
-            term: trimmedArtistName,
-            mode: .artist
-        )
-
-        Task { await exploreViewModel.loadPreset(artistPreset) }
+        Task { await exploreViewModel.runExternalArtistSearch(trimmedArtistName) }
     }
 }
 

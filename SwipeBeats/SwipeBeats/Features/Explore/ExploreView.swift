@@ -8,7 +8,7 @@ struct ExploreView: View {
 
     @ObservedObject var viewModel: ExploreViewModel
 
-    @State private var selectedPresetId: String = Constants.defaultSearchPresetId
+    @State private var selectedPresetId: String? = Constants.defaultSearchPresetId
     @State private var selectedTrack: Track?
 
     var body: some View {
@@ -21,15 +21,36 @@ struct ExploreView: View {
         .task {
             viewModel.configureLikesStore(context: modelContext)
         }
-        .task(id: selectedPresetId) {
+        .task {
             if viewModel.consumeAutomaticPresetLoadSuppression() {
                 return
             }
 
-            if let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) {
-                await viewModel.loadPreset(preset)
-            } else {
-                await viewModel.searchCurrentQuery()
+            guard viewModel.lastSearchedTerm.isEmpty else { return }
+            guard let selectedPresetId,
+                  let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) else { return }
+
+            await viewModel.loadPreset(preset, presetId: selectedPresetId)
+        }
+        .onChange(of: selectedPresetId) { oldValue, newValue in
+            guard oldValue != newValue else { return }
+            guard let newValue,
+                  let preset = Constants.searchPresets.first(where: { $0.id == newValue }) else { return }
+
+            Task {
+                await viewModel.loadPreset(preset, presetId: newValue)
+            }
+        }
+        .onChange(of: viewModel.currentSearchContext) { _, context in
+            switch context {
+            case .preset(let presetId):
+                if selectedPresetId != presetId {
+                    selectedPresetId = presetId
+                }
+            case .manual, .externalArtist:
+                if selectedPresetId != nil {
+                    selectedPresetId = nil
+                }
             }
         }
         .onChange(of: viewModel.onlyWithPreview) { _, _ in
@@ -48,9 +69,7 @@ struct ExploreView: View {
                     audio: audio,
                     onOpenArtist: { artistName in
                         selectedTrack = nil
-                        viewModel.query = artistName
-                        let artistPreset = SearchPreset(title: artistName, term: artistName, mode: .artist)
-                        Task { await viewModel.loadPreset(artistPreset) }
+                        Task { await viewModel.runExternalArtistSearch(artistName) }
                     }
                 )
             }
@@ -119,18 +138,24 @@ struct ExploreView: View {
 
             HStack(spacing: 12) {
                 Picker("Preset", selection: $selectedPresetId) {
+                    Text("Kein Preset").tag(String?.none)
                     ForEach(Constants.searchPresets) { preset in
-                        Text(preset.title).tag(preset.id)
+                        Text(preset.title).tag(Optional(preset.id))
                     }
                 }
                 .pickerStyle(.menu)
 
                 Button {
-                    guard let preset = Constants.searchPresets.first(where: { $0.id == selectedPresetId }) else {
-                        Task { await viewModel.searchCurrentQuery() }
-                        return
+                    switch viewModel.currentSearchContext {
+                    case .preset(let presetId):
+                        guard let preset = Constants.searchPresets.first(where: { $0.id == presetId }) else {
+                            Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
+                            return
+                        }
+                        Task { await viewModel.loadPreset(preset, presetId: presetId) }
+                    case .manual, .externalArtist:
+                        Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
                     }
-                    Task { await viewModel.loadPreset(preset) }
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
