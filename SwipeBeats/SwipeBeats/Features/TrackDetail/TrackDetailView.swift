@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 struct TrackDetailView: View {
     let track: Track
@@ -10,8 +11,8 @@ struct TrackDetailView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var toastManager: ToastManager
 
-    @State private var isLiked = false
     @State private var likesStore: LikedTracksStore?
+    @State private var likedIds: Set<Int> = []
     @State private var playlistsStore: PlaylistStore?
     @State private var playlists: [PlaylistEntity] = []
     @State private var showingAddToPlaylistSheet = false
@@ -35,6 +36,10 @@ struct TrackDetailView: View {
 
     private var isCurrentTrackSelected: Bool {
         audio.nowPlayingTrack?.id == track.id
+    }
+
+    private var isLiked: Bool {
+        likedIds.contains(track.id)
     }
 
     var body: some View {
@@ -164,10 +169,13 @@ struct TrackDetailView: View {
         .task {
             let store = LikedTracksStore(context: modelContext)
             likesStore = store
-            isLiked = store.isLiked(trackId: track.id)
+            likedIds = store.likedIds
             if playlistsStore == nil {
                 playlistsStore = PlaylistStore(context: modelContext)
             }
+        }
+        .onReceive(likedIdsPublisher) { ids in
+            likedIds = ids
         }
         .onChange(of: showingAddToPlaylistSheet) { _, isPresented in
             if isPresented {
@@ -246,13 +254,12 @@ struct TrackDetailView: View {
 
     private func toggleLike() {
         let store = likesStore ?? LikedTracksStore(context: modelContext)
+        likesStore = store
         if isLiked {
             store.unlike(trackId: track.id)
-            isLiked = false
             toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
         } else {
             store.like(track)
-            isLiked = true
             toastManager.show("Zu Favoriten hinzugefuegt", icon: "heart.fill")
         }
     }
@@ -298,6 +305,13 @@ struct TrackDetailView: View {
                 .padding(.horizontal, 12)
                 .padding(.bottom, bottomPadding)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+    }
+
+    private var likedIdsPublisher: AnyPublisher<Set<Int>, Never> {
+        if let likesStore {
+            return likesStore.$likedIds.eraseToAnyPublisher()
         }
+        return Just(likedIds).eraseToAnyPublisher()
     }
 }

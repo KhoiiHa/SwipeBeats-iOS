@@ -4,7 +4,7 @@ import Combine
 import os
 
 @MainActor
-final class LikedTracksStore {
+final class LikedTracksStore: ObservableObject {
 
     private let context: ModelContext
     private let logger = Logger(subsystem: "SwipeBeats", category: "LikedTracksStore")
