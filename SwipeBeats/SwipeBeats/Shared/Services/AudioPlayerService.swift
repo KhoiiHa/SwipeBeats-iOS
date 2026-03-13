@@ -57,11 +57,6 @@ final class AudioPlayerService: ObservableObject {
         state = .stopped
     }
 
-    func setNowPlaying(title: String, artist: String) {
-        nowPlayingTitle = title
-        nowPlayingArtist = artist
-    }
-
     func setNowPlaying(track: Track) {
         pendingNowPlayingTrack = track
     }

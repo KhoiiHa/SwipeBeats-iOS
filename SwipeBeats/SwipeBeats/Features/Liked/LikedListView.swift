@@ -10,7 +10,6 @@ import SwiftData
 
 struct LikedListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.openURL) private var openURL
     @EnvironmentObject private var audio: AudioPlayerService
     @EnvironmentObject private var toastManager: ToastManager
 
@@ -116,15 +115,6 @@ struct LikedListView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
-    }
-
-    private func openCollectionLink(for item: LikedTrackEntity) {
-        guard
-            let urlString = item.collectionViewURL,
-            let url = URL(string: urlString)
-        else { return }
-
-        openURL(url)
     }
 
     private func delete(at offsets: IndexSet) {
