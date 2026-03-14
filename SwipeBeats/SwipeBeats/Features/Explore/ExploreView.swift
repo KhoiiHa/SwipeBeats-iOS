@@ -77,14 +77,25 @@ struct ExploreView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
                 TextField("Künstler, Song, Genre…", text: $viewModel.query)
                     .textFieldStyle(.roundedBorder)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .submitLabel(.search)
                     .onSubmit { Task { await viewModel.searchCurrentQuery() } }
+
+                if !viewModel.query.isEmpty {
+                    Button {
+                        viewModel.query = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Suche leeren")
+                }
 
                 Button {
                     Task { await viewModel.searchCurrentQuery() }
@@ -94,6 +105,70 @@ struct ExploreView: View {
                 .buttonStyle(.bordered)
                 .disabled(viewModel.state == .loading || viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+
+            Picker("Preset", selection: $selectedPresetId) {
+                Text("Kein Preset").tag(String?.none)
+                ForEach(Constants.searchPresets) { preset in
+                    Text(preset.title).tag(Optional(preset.id))
+                }
+            }
+            .pickerStyle(.menu)
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 12) {
+                    Toggle("Nur mit Vorschau", isOn: $viewModel.onlyWithPreview)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+
+                    Spacer(minLength: 8)
+
+                    Picker("Sort", selection: $viewModel.sortOption) {
+                        ForEach(ExploreViewModel.SortOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+
+                HStack(spacing: 12) {
+                    HStack {
+                        Text("Limit")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Picker("Limit", selection: $viewModel.limit) {
+                            Text("25").tag(25)
+                            Text("50").tag(50)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 140)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        switch viewModel.currentSearchContext {
+                        case .preset(let presetId):
+                            guard let preset = Constants.searchPresets.first(where: { $0.id == presetId }) else {
+                                Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
+                                return
+                            }
+                            Task { await viewModel.loadPreset(preset, presetId: presetId) }
+                        case .manual, .externalArtist:
+                            Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(viewModel.state == .loading)
+                }
+            }
+            .font(.subheadline)
+            .padding(12)
+            .padding(.top, 12)
+            .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
 
             if !viewModel.recentSearches.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
@@ -137,64 +212,6 @@ struct ExploreView: View {
                     }
                 }
             }
-
-            HStack(spacing: 12) {
-                Picker("Preset", selection: $selectedPresetId) {
-                    Text("Kein Preset").tag(String?.none)
-                    ForEach(Constants.searchPresets) { preset in
-                        Text(preset.title).tag(Optional(preset.id))
-                    }
-                }
-                .pickerStyle(.menu)
-
-                Button {
-                    switch viewModel.currentSearchContext {
-                    case .preset(let presetId):
-                        guard let preset = Constants.searchPresets.first(where: { $0.id == presetId }) else {
-                            Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
-                            return
-                        }
-                        Task { await viewModel.loadPreset(preset, presetId: presetId) }
-                    case .manual, .externalArtist:
-                        Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
-                    }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.bordered)
-                .disabled(viewModel.state == .loading)
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 12) {
-                    Toggle("Nur mit Vorschau", isOn: $viewModel.onlyWithPreview)
-                        .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
-
-                    Spacer(minLength: 8)
-
-                    Picker("Sort", selection: $viewModel.sortOption) {
-                        ForEach(ExploreViewModel.SortOption.allCases) { option in
-                            Text(option.rawValue).tag(option)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                }
-
-                HStack {
-                    Text("Limit")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Picker("Limit", selection: $viewModel.limit) {
-                        Text("25").tag(25)
-                        Text("50").tag(50)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 140)
-                }
-            }
-            .font(.subheadline)
         }
         .padding(.horizontal)
     }
@@ -246,7 +263,7 @@ struct ExploreView: View {
                         selectedTrack = track
                     } label: {
                         TrackRowView(track: track)
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 3)
                     }
                         .buttonStyle(.plain)
                         .accessibilityHint("Öffnet die Track-Details")
@@ -299,6 +316,7 @@ struct ExploreView: View {
                     }
                 }
                 .listStyle(.plain)
+                .listRowSeparatorTint(.secondary.opacity(0.18))
                 .refreshable {
                     await viewModel.searchCurrentQuery(forceKeyword: false)
                 }

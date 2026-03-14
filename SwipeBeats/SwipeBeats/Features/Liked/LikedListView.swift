@@ -65,8 +65,8 @@ struct LikedListView: View {
     private func row(_ item: LikedTrackEntity) -> some View {
         HStack(spacing: 12) {
             artwork(item)
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(width: 58, height: 58)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.trackName)
@@ -84,6 +84,7 @@ struct LikedListView: View {
             Image(systemName: "chevron.right")
                 .foregroundStyle(.secondary)
         }
+        .padding(.vertical, 2)
         .contentShape(Rectangle())
     }
 
@@ -108,7 +109,7 @@ struct LikedListView: View {
     }
 
     private var placeholderArtwork: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(.secondary.opacity(0.2))
             .overlay {
                 Image(systemName: "music.note")

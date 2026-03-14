@@ -39,7 +39,8 @@ struct SwipeCardView: View {
         .padding(20)
         .frame(maxWidth: .infinity)
         .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }
 
     private var previewControls: some View {
@@ -64,7 +65,7 @@ struct SwipeCardView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .disabled(track.previewURL == nil)

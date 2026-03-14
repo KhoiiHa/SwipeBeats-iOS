@@ -20,12 +20,12 @@ struct ToastView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(.white.opacity(0.15), lineWidth: 0.5)
         }
-        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
         .accessibilityElement(children: .combine)
     }
 }

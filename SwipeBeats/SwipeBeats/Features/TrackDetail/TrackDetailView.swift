@@ -48,7 +48,7 @@ struct TrackDetailView: View {
                 AsyncArtworkImage(url: track.artworkURL)
                     .frame(width: 260, height: 260)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(radius: 12)
+                    .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
                     .padding(.top, 8)
 
                 VStack(spacing: 8) {

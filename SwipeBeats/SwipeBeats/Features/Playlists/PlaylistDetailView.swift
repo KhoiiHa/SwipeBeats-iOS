@@ -103,8 +103,8 @@ struct PlaylistDetailView: View {
     private func row(for snapshot: PlaylistTrackSnapshot) -> some View {
         HStack(spacing: 12) {
             artwork(for: snapshot)
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(width: 58, height: 58)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(snapshot.title)
@@ -124,7 +124,7 @@ struct PlaylistDetailView: View {
                 .foregroundStyle(.secondary)
                 .opacity(snapshot.previewURL == nil ? 0.3 : 1)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
         .contentShape(Rectangle())
         .opacity(snapshot.previewURL == nil ? 0.6 : 1)
     }
@@ -152,7 +152,7 @@ struct PlaylistDetailView: View {
     }
 
     private var placeholderArtwork: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(.secondary.opacity(0.2))
             .overlay {
                 Image(systemName: "music.note")
