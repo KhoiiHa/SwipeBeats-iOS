@@ -99,7 +99,7 @@ struct SwipeView: View {
                             Button {
                                 Task { await animateOutAndAdvance(.like) }
                             } label: {
-                                Label("Favorit", systemImage: "heart.fill")
+                                Label("Favorit", systemImage: "heart")
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent)

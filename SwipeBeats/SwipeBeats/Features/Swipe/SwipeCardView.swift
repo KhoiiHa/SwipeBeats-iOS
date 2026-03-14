@@ -49,7 +49,7 @@ struct SwipeCardView: View {
             audio.toggle(url: track.previewURL)
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: isCurrentTrackPlaying ? "pause.circle.fill" : "play.circle.fill")
+                Image(systemName: isCurrentTrackPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 28, weight: .semibold))
 
                 VStack(alignment: .leading, spacing: 2) {
