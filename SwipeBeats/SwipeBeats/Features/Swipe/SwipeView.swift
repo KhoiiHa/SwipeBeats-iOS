@@ -34,6 +34,7 @@ struct SwipeView: View {
                             Task { await viewModel.load(term: selectedTerm) }
                         }
                     }
+                    .tint(.teal)
                 }
 
             case .error(let message):
@@ -52,6 +53,7 @@ struct SwipeView: View {
                             Task { await viewModel.load(term: selectedTerm) }
                         }
                     }
+                    .tint(.teal)
                 }
 
             case .content:
@@ -94,6 +96,7 @@ struct SwipeView: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.bordered)
+                            .tint(.secondary)
                             .accessibilityLabel("Track überspringen")
 
                             Button {
@@ -103,6 +106,7 @@ struct SwipeView: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent)
+                            .tint(.pink)
                             .accessibilityLabel("Zu Favoriten hinzufügen")
                         }
                         .padding(.horizontal)
@@ -216,6 +220,7 @@ struct SwipeView: View {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.bordered)
+            .tint(.teal)
             .disabled(viewModel.state == .loading)
         }
         .padding(.horizontal)

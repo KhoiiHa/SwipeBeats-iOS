@@ -103,6 +103,7 @@ struct ExploreView: View {
                     Image(systemName: "magnifyingglass")
                 }
                 .buttonStyle(.bordered)
+                .tint(.teal)
                 .disabled(viewModel.state == .loading || viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
@@ -161,13 +162,14 @@ struct ExploreView: View {
                         Image(systemName: "arrow.clockwise")
                     }
                     .buttonStyle(.bordered)
+                    .tint(.teal)
                     .disabled(viewModel.state == .loading)
                 }
             }
             .font(.subheadline)
             .padding(12)
             .padding(.top, 12)
-            .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
 
             if !viewModel.recentSearches.isEmpty {
@@ -251,6 +253,7 @@ struct ExploreView: View {
                     Task { await viewModel.searchCurrentQuery(forceKeyword: false) }
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.teal)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -277,7 +280,7 @@ struct ExploreView: View {
                                     Label("Zu Favoriten hinzufügen", systemImage: "heart")
                                 }
                             }
-                            .tint(isLiked ? .gray : .pink)
+                            .tint(isLiked ? .secondary : .pink)
 
                             if let url = track.collectionViewURL {
                                 Button {

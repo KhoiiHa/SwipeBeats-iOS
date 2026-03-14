@@ -88,6 +88,7 @@ struct TrackDetailView: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(.teal)
                     .disabled(track.previewURL == nil)
                     .accessibilityLabel(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
                     .accessibilityHint(track.previewURL == nil ? "Für diesen Track ist keine Vorschau verfügbar" : "Spielt eine 30 Sekunden Vorschau ab")
@@ -99,6 +100,7 @@ struct TrackDetailView: View {
                             .frame(minWidth: 88, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
+                    .tint(.secondary)
                     .disabled(audio.state == .stopped || !isCurrentTrackSelected)
                     .accessibilityLabel("Vorschau stoppen")
 
@@ -109,6 +111,7 @@ struct TrackDetailView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
+                    .tint(isLiked ? .secondary : .pink)
                     .accessibilityLabel(isLiked ? "Aus Favoriten entfernen" : "Zu Favoriten hinzufügen")
                 }
                 .padding(.horizontal)
@@ -204,6 +207,7 @@ struct TrackDetailView: View {
                                 showingCreatePlaylistAlert = true
                             }
                             .buttonStyle(.borderedProminent)
+                            .tint(.teal)
                             .frame(minHeight: 44)
                             .accessibilityHint("Öffnet den Dialog zum Erstellen einer Playlist")
                         }

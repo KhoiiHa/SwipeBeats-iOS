@@ -31,6 +31,7 @@ struct MiniPlayerBar: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
+            .tint(.teal)
             .accessibilityLabel(audio.isPlaying ? "Wiedergabe pausieren" : "Wiedergabe starten")
             .accessibilityHint("Steuert die aktuelle Vorschau")
 
@@ -42,6 +43,7 @@ struct MiniPlayerBar: View {
                     .frame(width: 44, height: 44)
             }
             .buttonStyle(.bordered)
+            .tint(.secondary)
             .accessibilityLabel("Wiedergabe stoppen")
             .accessibilityHint("Beendet die aktuelle Vorschau")
         }

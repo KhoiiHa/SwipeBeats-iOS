@@ -50,6 +50,7 @@ struct PlaylistsView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .tint(.teal)
                 .accessibilityLabel("Playlist erstellen")
             }
         }
@@ -61,6 +62,7 @@ struct PlaylistsView: View {
                 }
                 .navigationTitle("Neue Playlist")
                 .navigationBarTitleDisplayMode(.inline)
+                .tint(.teal)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Abbrechen") {

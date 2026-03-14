@@ -29,6 +29,7 @@ struct PlaylistDetailView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(.teal)
                     .disabled(firstPlayableTrack(in: playlist) == nil)
                     .padding(.horizontal)
                     .accessibilityLabel("Playlist abspielen")
