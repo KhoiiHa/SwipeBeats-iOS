@@ -64,7 +64,7 @@ struct AppRootView: View {
             .environmentObject(audio)
             .environmentObject(toastManager)
             .safeAreaInset(edge: .bottom) {
-                if audio.isPlaying {
+                if audio.hasActivePlaybackContext {
                     Color.clear.frame(height: miniPlayerReservedHeight + 8)
                 }
             }
@@ -77,12 +77,12 @@ struct AppRootView: View {
                                 .bottom,
                                 geometry.safeAreaInsets.bottom
                                     + tabBarHeight
-                                    + (audio.isPlaying ? miniPlayerReservedHeight + 16 : 8)
+                                    + (audio.hasActivePlaybackContext ? miniPlayerReservedHeight + 16 : 8)
                             )
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
 
-                    if audio.isPlaying {
+                    if audio.hasActivePlaybackContext {
                         MiniPlayerBar(audio: audio) {
                             if let track = audio.nowPlayingTrack {
                                 nowPlayingDetailTrack = track
@@ -94,7 +94,7 @@ struct AppRootView: View {
                     }
                 }
             }
-            .animation(.easeInOut(duration: 0.22), value: audio.isPlaying)
+            .animation(.easeInOut(duration: 0.22), value: audio.hasActivePlaybackContext)
             .animation(.easeInOut(duration: 0.22), value: toastManager.toast)
             .task {
                 exploreViewModel.configureLikesStore(context: modelContext)

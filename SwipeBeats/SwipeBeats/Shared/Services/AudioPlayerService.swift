@@ -22,8 +22,17 @@ final class AudioPlayerService: ObservableObject {
     private var pendingNowPlayingTrack: Track?
 
     var isPlaying: Bool { state == .playing }
+    var hasActivePlaybackContext: Bool {
+        state != .stopped && (nowPlayingTrack != nil || nowPlayingTitle != nil || lastPreviewURL != nil)
+    }
 
     func play(url: URL) {
+        if lastPreviewURL == url, state == .paused, player != nil {
+            resumeCurrentPlayback()
+            syncNowPlaying(for: url)
+            return
+        }
+
         if let current = lastPreviewURL, current != url {
             stopPlayerOnly()
         }
@@ -57,6 +66,11 @@ final class AudioPlayerService: ObservableObject {
         state = .stopped
     }
 
+    private func resumeCurrentPlayback() {
+        player?.play()
+        state = .playing
+    }
+
     func setNowPlaying(track: Track) {
         pendingNowPlayingTrack = track
     }
@@ -70,7 +84,13 @@ final class AudioPlayerService: ObservableObject {
                 } else {
                     play(url: url)
                 }
-            case .paused, .stopped, .failed:
+            case .paused:
+                if lastPreviewURL == url, player != nil {
+                    resumeCurrentPlayback()
+                } else {
+                    play(url: url)
+                }
+            case .stopped, .failed:
                 play(url: url)
             }
             return
@@ -79,7 +99,13 @@ final class AudioPlayerService: ObservableObject {
         switch state {
         case .playing:
             pause()
-        case .paused, .stopped, .failed:
+        case .paused:
+            if player != nil {
+                resumeCurrentPlayback()
+            } else if let lastPreviewURL {
+                play(url: lastPreviewURL)
+            }
+        case .stopped, .failed:
             if let lastPreviewURL {
                 play(url: lastPreviewURL)
             }
