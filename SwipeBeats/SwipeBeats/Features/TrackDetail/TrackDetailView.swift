@@ -76,7 +76,7 @@ struct TrackDetailView: View {
                 }
                 .padding(.horizontal)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     Button {
                         audio.setNowPlaying(track: track)
                         audio.toggle(url: track.previewURL)
@@ -85,6 +85,10 @@ struct TrackDetailView: View {
                             isCurrentTrackPlaying ? "Pausieren" : "Abspielen",
                             systemImage: isCurrentTrackPlaying ? "pause.fill" : "play.fill"
                         )
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                        .allowsTightening(true)
                         .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
@@ -97,7 +101,11 @@ struct TrackDetailView: View {
                         audio.stop()
                     } label: {
                         Label("Stoppen", systemImage: "stop.fill")
-                            .frame(minWidth: 88, minHeight: 44)
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                            .allowsTightening(true)
+                            .frame(minWidth: 80, minHeight: 44)
                     }
                     .buttonStyle(.bordered)
                     .tint(.secondary)
@@ -108,6 +116,10 @@ struct TrackDetailView: View {
                         toggleLike()
                     } label: {
                         Label(isLiked ? "Favorisiert" : "Zu Favoriten", systemImage: isLiked ? "heart.fill" : "heart")
+                            .font(.subheadline.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+                            .allowsTightening(true)
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.bordered)

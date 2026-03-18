@@ -51,6 +51,7 @@ struct SwipeCardView: View {
             HStack(spacing: 10) {
                 Image(systemName: isCurrentTrackPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(.teal)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
@@ -64,8 +65,12 @@ struct SwipeCardView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
+            .background(.regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+            }
         }
         .buttonStyle(.plain)
         .disabled(track.previewURL == nil)
