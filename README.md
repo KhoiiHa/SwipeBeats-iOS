@@ -1,7 +1,9 @@
 # 🎧 SwipeBeats
 
+## 🇩🇪 Deutsch
+
 SwipeBeats ist eine moderne iOS-App zur schnellen Musik-Discovery über kurze Audio-Previews.  
-Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Songs intuitiv zu entdecken, zu speichern und zu organisieren.
+Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Songs intuitiv zu entdecken, vorzuhören und zu organisieren.
 
 👉 Fokus: **schnelles Entdecken, direktes Vorhören und einfache Organisation von Musik**
 
@@ -9,9 +11,23 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 
 ## 📱 App Preview
 
-<!-- Hier kommen deine Screenshots rein -->
-<!-- Beispiel: -->
-<!-- ![Swipe](./screens/swipe.png) -->
+### 🔄 Swipe Discovery
+![Swipe](./screens/swipe.png)
+
+### 🔍 Explore
+![Explore](./screens/explore.png)
+
+### 🎵 Track Details
+![Detail](./screens/detail.png)
+
+### ❤️ Favoriten
+![Favorites](./screens/favorites.png)
+
+### 📂 Playlists
+![Playlists](./screens/playlists.png)
+
+### 📄 Playlist Detail
+![Playlist Detail](./screens/playlist-detail.png)
 
 ---
 
@@ -47,85 +63,108 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 
 ## 🧰 Tech Stack
 
-- **Swift & SwiftUI** – moderne UI-Entwicklung  
-- **MVVM Architektur** – klare Trennung von UI und Logik  
-- **SwiftData** – lokale Persistenz  
-- **AVFoundation / AVPlayer** – Audio-Wiedergabe  
-- **URLSession** – Networking  
-- **iTunes Search API** – Datenquelle für Musik  
-
----
-
-## 🏗 Architektur
-
-Die App folgt einer MVVM-Struktur:
-
-- **Views** → UI und User-Interaktion  
-- **ViewModels** → State-Management und Use-Cases  
-- **Services & Stores** → Persistenz und systemnahe Logik  
-
-### Zentrale Komponenten
-
-- `AppRootView` → Tab-Struktur, MiniPlayer, Toast-System  
-- `AudioPlayerService` → globaler Audio-Flow  
-- `ExploreViewModel` → Suche, Filter, History  
-- `SwipeViewModel` → Swipe-Logik  
-- `LikedTracksStore` → Favoritenverwaltung  
-- `PlaylistStore` → Playlist-CRUD und Track-Snapshots  
-
----
-
-## ✨ Technische Highlights
-
-- 🎵 **Globaler Audio-Flow**  
-  Konsistenter Playback-State über mehrere Screens hinweg inkl. MiniPlayer  
-
-- 🔎 **Flexible Search-Logik**  
-  Kombination aus Presets, manueller Suche und Artist-Navigation  
-
-- ⚡ **Performanter Like-State**  
-  Cache-basierte Verwaltung statt wiederholter Datenbankzugriffe  
-
-- 📂 **Playlist-System mit Snapshots**  
-  Tracks werden als Snapshot gespeichert → stabile Anzeige & Preview  
-
-- 🔔 **Globales Toast-System**  
-  Wiederverwendbares Feedback-System für Aktionen  
+- **Swift & SwiftUI**  
+- **MVVM Architektur**  
+- **SwiftData**  
+- **AVFoundation / AVPlayer**  
+- **URLSession**  
+- **iTunes Search API**  
 
 ---
 
 ## ⚠️ Aktueller Scope (MVP)
 
-SwipeBeats ist bewusst als leichtgewichtige Discovery-App umgesetzt:
-
-- Audio basiert auf **30-Sekunden-Previews** (kein Full Streaming)  
-- Playlists haben **kein vollständiges Queue-System**  
-- „Playlist abspielen“ startet aktuell nur den ersten Track  
-- Keine Cloud-Synchronisation oder Accounts  
+- 30-Sekunden-Previews (kein Full Streaming)  
+- Kein Queue-System für Playlists  
+- „Play All“ startet aktuell nur den ersten Track  
+- Keine Cloud-Synchronisation  
 
 ---
 
-## 🧠 Learnings
+---
 
-Während der Entwicklung lag der Fokus auf:
+## 🇬🇧 English
 
-- Aufbau eines konsistenten globalen Audio-Systems  
-- Strukturierung einer skalierbaren SwiftUI + MVVM Architektur  
-- Performance-Optimierung bei Listen und Like-Status  
-- sauberes UI/UX-Polishing für eine konsistente Nutzererfahrung  
+SwipeBeats is a modern iOS app for fast music discovery using short audio previews.  
+It combines traditional search with a swipe-based interaction model to help users quickly explore, preview, and organize music.
+
+👉 Focus: **fast discovery, instant preview, and simple music organization**
 
 ---
 
-## 🔮 Future Improvements
+## 📱 App Preview
 
-- Erweiterung des Playlist-Systems (Queue, Next Track)  
-- Verbesserte Audio-Steuerung und Playback-Features  
-- Optionaler Cloud-Sync für Favoriten & Playlists  
-- Weitere Discovery-Mechaniken  
+### 🔄 Swipe Discovery
+![Swipe](./screens/swipe.png)
+
+### 🔍 Explore
+![Explore](./screens/explore.png)
+
+### 🎵 Track Details
+![Detail](./screens/detail.png)
+
+### ❤️ Favorites
+![Favorites](./screens/favorites.png)
+
+### 📂 Playlists
+![Playlists](./screens/playlists.png)
+
+### 📄 Playlist Detail
+![Playlist Detail](./screens/playlist-detail.png)
 
 ---
 
-## 👨‍💻 Autor
+## 🚀 Core Features
+
+### 🔍 Explore – Discover Music
+- Search by artist, song, or genre  
+- Presets for quick discovery  
+- Filtering & sorting (e.g. only tracks with preview)  
+- Recent search history  
+
+### 🔄 Swipe Discovery
+- Tinder-like interaction to browse tracks  
+- Quickly skip or like tracks  
+- Access track details instantly  
+
+### ▶️ Global Audio Player
+- 30-second previews across the entire app  
+- Global MiniPlayer with consistent playback state  
+- Seamless navigation between screens  
+
+### ❤️ Favorites
+- Like / unlike tracks  
+- Persistent storage via SwiftData  
+- Quick access to saved songs  
+
+### 📂 Playlists
+- Create, rename, and delete playlists  
+- Add tracks to playlists  
+- Play individual tracks from playlists  
+
+---
+
+## 🧰 Tech Stack
+
+- **Swift & SwiftUI**  
+- **MVVM Architecture**  
+- **SwiftData (Persistence)**  
+- **AVFoundation / AVPlayer**  
+- **URLSession (Networking)**  
+- **iTunes Search API**  
+
+---
+
+## ⚠️ Current Scope (MVP)
+
+- Based on **30-second previews** (not full streaming)  
+- No full playlist queue system  
+- “Play All” starts only the first playable track  
+- No cloud sync or accounts  
+
+---
+
+## 👨‍💻 Author
 
 Minh Khoi Ha  
-Junior iOS Developer  
+Junior iOS Developer
