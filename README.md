@@ -11,23 +11,17 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 
 ## 📱 App Preview
 
-### 🔄 Swipe Discovery
-![Swipe](./screens/swipe.png)
+<p align="center">
+  <img src="./screens/swipe.png" width="20%" />
+  <img src="./screens/explore.png" width="20%" />
+  <img src="./screens/detail.png" width="20%" />
+</p>
 
-### 🔍 Explore
-![Explore](./screens/explore.png)
-
-### 🎵 Track Details
-![Detail](./screens/detail.png)
-
-### ❤️ Favoriten
-![Favorites](./screens/favorites.png)
-
-### 📂 Playlists
-![Playlists](./screens/playlists.png)
-
-### 📄 Playlist Detail
-![Playlist Detail](./screens/playlist-detail.png)
+<p align="center">
+  <img src="./screens/favorites.png" width="20%" />
+  <img src="./screens/playlists.png" width="20%" />
+  <img src="./screens/playlist-detail.png" width="20%" />
+</p>
 
 ---
 
@@ -74,10 +68,12 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 
 ## ⚠️ Aktueller Scope (MVP)
 
-- 30-Sekunden-Previews (kein Full Streaming)  
-- Kein Queue-System für Playlists  
-- „Play All“ startet aktuell nur den ersten Track  
-- Keine Cloud-Synchronisation  
+SwipeBeats ist bewusst als leichtgewichtige Discovery-App umgesetzt:
+
+- Audio basiert auf **30-Sekunden-Previews** (kein Full Streaming)  
+- Playlists haben **kein vollständiges Queue-System**  
+- „Playlist abspielen“ startet aktuell nur den ersten Track  
+- Keine Cloud-Synchronisation oder Accounts  
 
 ---
 
@@ -94,23 +90,17 @@ It combines traditional search with a swipe-based interaction model to help user
 
 ## 📱 App Preview
 
-### 🔄 Swipe Discovery
-![Swipe](./screens/swipe.png)
+<p align="center">
+  <img src="./screens/swipe.png" width="20%" />
+  <img src="./screens/explore.png" width="20%" />
+  <img src="./screens/detail.png" width="20%" />
+</p>
 
-### 🔍 Explore
-![Explore](./screens/explore.png)
-
-### 🎵 Track Details
-![Detail](./screens/detail.png)
-
-### ❤️ Favorites
-![Favorites](./screens/favorites.png)
-
-### 📂 Playlists
-![Playlists](./screens/playlists.png)
-
-### 📄 Playlist Detail
-![Playlist Detail](./screens/playlist-detail.png)
+<p align="center">
+  <img src="./screens/favorites.png" width="20%" />
+  <img src="./screens/playlists.png" width="20%" />
+  <img src="./screens/playlist-detail.png" width="20%" />
+</p>
 
 ---
 
