@@ -30,6 +30,15 @@ final class SwipeBeatsTests: XCTestCase {
         XCTAssertEqual(viewModel.results.map(\.trackName), ["Alpha", "Zulu"])
     }
 
+    func testExploreShowsNetworkErrorState() async {
+        let viewModel = ExploreViewModel(service: MockSearchService(error: URLError(.notConnectedToInternet)))
+
+        viewModel.query = "test"
+        await viewModel.searchCurrentQuery()
+
+        XCTAssertEqual(viewModel.state, .error("Keine Internetverbindung."))
+    }
+
     func testSwipeSkipMovesToNextTrack() async {
         let viewModel = SwipeViewModel(
             service: MockSearchService(results: [
@@ -44,6 +53,21 @@ final class SwipeBeatsTests: XCTestCase {
 
         XCTAssertEqual(viewModel.currentTrack?.id, 2)
         XCTAssertEqual(viewModel.state, .content)
+    }
+
+    func testSwipeSkipLastTrackShowsEmptyState() async {
+        let viewModel = SwipeViewModel(
+            service: MockSearchService(results: [
+                makeTrack(id: 1, title: "Only")
+            ]),
+            audio: AudioPlayerService()
+        )
+
+        await viewModel.load(term: "test")
+        viewModel.skip()
+
+        XCTAssertNil(viewModel.currentTrack)
+        XCTAssertEqual(viewModel.state, .empty)
     }
 
     func testAudioQueueTracksNextState() {
@@ -67,10 +91,14 @@ final class SwipeBeatsTests: XCTestCase {
 }
 
 private struct MockSearchService: ITunesSearching {
-    let results: [Track]
+    var results: [Track] = []
+    var error: Error?
 
     func search(term: String, limit: Int, mode: SearchPreset.Mode, genreId: Int?) async throws -> [Track] {
-        Array(results.prefix(limit))
+        if let error {
+            throw error
+        }
+        return Array(results.prefix(limit))
     }
 }
 
