@@ -52,6 +52,7 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 - Playlists erstellen, umbenennen und löschen  
 - Tracks zu Playlists hinzufügen  
 - Einzelne Tracks direkt aus Playlists abspielen  
+- Playlist-Queue mit automatischem Wechsel zum nächsten spielbaren Track
 
 ---
 
@@ -71,8 +72,8 @@ Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Song
 SwipeBeats ist bewusst als leichtgewichtige Discovery-App umgesetzt:
 
 - Audio basiert auf **30-Sekunden-Previews** (kein Full Streaming)  
-- Playlists haben **kein vollständiges Queue-System**  
-- „Playlist abspielen“ startet aktuell nur den ersten Track  
+- Playlists unterstützen eine einfache Preview-Queue
+- „Playlist abspielen“ startet alle spielbaren Tracks nacheinander
 - Keine Cloud-Synchronisation oder Accounts  
 
 ---
@@ -131,6 +132,7 @@ It combines traditional search with a swipe-based interaction model to help user
 - Create, rename, and delete playlists  
 - Add tracks to playlists  
 - Play individual tracks from playlists  
+- Playlist queue with automatic playback of the next playable track
 
 ---
 
@@ -148,8 +150,8 @@ It combines traditional search with a swipe-based interaction model to help user
 ## ⚠️ Current Scope (MVP)
 
 - Based on **30-second previews** (not full streaming)  
-- No full playlist queue system  
-- “Play All” starts only the first playable track  
+- Playlists support a lightweight preview queue
+- “Play All” plays all playable tracks in sequence
 - No cloud sync or accounts  
 
 ---

@@ -24,6 +24,19 @@ struct MiniPlayerBar: View {
             Spacer()
 
             Button {
+                audio.playNext()
+            } label: {
+                Image(systemName: "forward.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.bordered)
+            .tint(.teal)
+            .disabled(!audio.hasNextTrack)
+            .accessibilityLabel("Nächsten Track abspielen")
+            .accessibilityHint("Springt zum nächsten Track in der Playlist")
+
+            Button {
                 audio.toggle(url: nil)
             } label: {
                 Image(systemName: audio.isPlaying ? "pause.fill" : "play.fill")

@@ -22,8 +22,11 @@ struct PlaylistDetailView: View {
                 )
             } else {
                 VStack(spacing: 12) {
+                    playlistSummary
+                        .padding(.horizontal)
+
                     Button {
-                        playFirstAvailableTrack(in: playlist)
+                        playPlaylist(in: playlist)
                     } label: {
                         Label("Playlist abspielen", systemImage: "play.fill")
                             .frame(maxWidth: .infinity, minHeight: 44)
@@ -38,14 +41,14 @@ struct PlaylistDetailView: View {
                     List {
                         ForEach(playlist.tracks) { snapshot in
                             Button {
-                                play(snapshot)
+                                playPlaylist(in: playlist, startingAt: snapshot)
                             } label: {
                                 row(for: snapshot)
                             }
                             .buttonStyle(.plain)
-                            .disabled(snapshot.previewURL == nil)
+                            .disabled(!isPlayable(snapshot))
                             .accessibilityLabel("\(snapshot.title) von \(snapshot.artist)")
-                            .accessibilityHint(snapshot.previewURL == nil ? "Keine Vorschau verfügbar" : "Spielt die Vorschau dieses Tracks ab")
+                            .accessibilityHint(isPlayable(snapshot) ? "Spielt die Playlist ab diesem Track ab" : "Keine Vorschau verfügbar")
                         }
                         .onDelete(perform: removeTracks)
                     }
@@ -76,6 +79,25 @@ struct PlaylistDetailView: View {
         }
     }
 
+    private var playlistSummary: some View {
+        let playableCount = playableTracks(in: playlist).count
+        let totalCount = playlist.tracks.count
+
+        return HStack(spacing: 8) {
+            Image(systemName: "music.note.list")
+                .foregroundStyle(.teal)
+
+            Text("\(playableCount) von \(totalCount) Tracks spielbar")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
     private func ensureStore() {
         if store == nil {
             store = PlaylistStore(context: modelContext)
@@ -102,32 +124,52 @@ struct PlaylistDetailView: View {
     }
 
     private func row(for snapshot: PlaylistTrackSnapshot) -> some View {
-        HStack(spacing: 12) {
+        let isCurrentTrack = isCurrent(snapshot)
+        let isPlayableTrack = isPlayable(snapshot)
+
+        return HStack(spacing: 12) {
             artwork(for: snapshot)
                 .frame(width: 58, height: 58)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay {
+                    if isCurrentTrack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(.teal, lineWidth: 2)
+                    }
+                }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(snapshot.title)
                     .font(.headline)
+                    .foregroundStyle(isCurrentTrack ? .teal : .primary)
                     .lineLimit(1)
 
                 Text(snapshot.artist)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                if isCurrentTrack {
+                    Label(audio.isPlaying ? "Spielt gerade" : "Aktueller Track", systemImage: audio.isPlaying ? "speaker.wave.2.fill" : "pause.fill")
+                        .font(.caption)
+                        .foregroundStyle(.teal)
+                } else if !isPlayableTrack {
+                    Label("Keine Vorschau", systemImage: "speaker.slash.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
 
-            Image(systemName: "play.fill")
+            Image(systemName: isCurrentTrack ? "speaker.wave.2.fill" : "play.fill")
                 .font(.caption)
-                .foregroundStyle(.secondary)
-                .opacity(snapshot.previewURL == nil ? 0.3 : 1)
+                .foregroundStyle(isCurrentTrack ? .teal : .secondary)
+                .opacity(isPlayableTrack ? 1 : 0.3)
         }
         .padding(.vertical, 2)
         .contentShape(Rectangle())
-        .opacity(snapshot.previewURL == nil ? 0.6 : 1)
+        .opacity(isPlayableTrack ? 1 : 0.6)
     }
 
     @ViewBuilder
@@ -162,11 +204,11 @@ struct PlaylistDetailView: View {
             }
     }
 
-    private func play(_ snapshot: PlaylistTrackSnapshot) {
+    private func makeTrack(from snapshot: PlaylistTrackSnapshot) -> Track? {
         guard let previewURLString = snapshot.previewURL,
-              let previewURL = URL(string: previewURLString) else { return }
+              let previewURL = URL(string: previewURLString) else { return nil }
 
-        let track = Track(
+        return Track(
             id: snapshot.trackId,
             artistName: snapshot.artist,
             trackName: snapshot.title,
@@ -175,20 +217,39 @@ struct PlaylistDetailView: View {
             collectionViewURL: nil,
             primaryGenreName: nil
         )
-
-        audio.setNowPlaying(track: track)
-        audio.toggle(url: previewURL)
     }
 
     private func firstPlayableTrack(in playlist: PlaylistEntity) -> PlaylistTrackSnapshot? {
         playlist.tracks.first { snapshot in
-            guard let previewURL = snapshot.previewURL else { return false }
-            return URL(string: previewURL) != nil
+            isPlayable(snapshot)
         }
     }
 
-    private func playFirstAvailableTrack(in playlist: PlaylistEntity) {
-        guard let snapshot = firstPlayableTrack(in: playlist) else { return }
-        play(snapshot)
+    private func playableTracks(in playlist: PlaylistEntity) -> [Track] {
+        playlist.tracks.compactMap(makeTrack)
+    }
+
+    private func playPlaylist(in playlist: PlaylistEntity, startingAt snapshot: PlaylistTrackSnapshot? = nil) {
+        let tracks = playableTracks(in: playlist)
+        guard !tracks.isEmpty else { return }
+
+        let startIndex: Int
+        if let snapshot,
+           let index = tracks.firstIndex(where: { $0.id == snapshot.trackId }) {
+            startIndex = index
+        } else {
+            startIndex = 0
+        }
+
+        audio.playQueue(tracks, startAt: startIndex)
+    }
+
+    private func isPlayable(_ snapshot: PlaylistTrackSnapshot) -> Bool {
+        guard let previewURL = snapshot.previewURL else { return false }
+        return URL(string: previewURL) != nil
+    }
+
+    private func isCurrent(_ snapshot: PlaylistTrackSnapshot) -> Bool {
+        audio.nowPlayingTrack?.id == snapshot.trackId
     }
 }

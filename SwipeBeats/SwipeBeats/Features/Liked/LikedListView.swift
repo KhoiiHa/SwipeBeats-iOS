@@ -43,6 +43,31 @@ struct LikedListView: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel("\(item.trackName) von \(item.artistName)")
                         .accessibilityHint("Öffnet die Track-Details")
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            if item.previewURL.flatMap(URL.init(string:)) != nil {
+                                Button {
+                                    playPreview(from: item)
+                                } label: {
+                                    Label("Vorschau", systemImage: "play.fill")
+                                }
+                                .tint(.teal)
+                            }
+                        }
+                        .contextMenu {
+                            Button {
+                                detailTrack = makeTrack(from: item)
+                            } label: {
+                                Label("Details", systemImage: "info.circle")
+                            }
+
+                            if item.previewURL.flatMap(URL.init(string:)) != nil {
+                                Button {
+                                    playPreview(from: item)
+                                } label: {
+                                    Label("Vorschau abspielen", systemImage: "play.fill")
+                                }
+                            }
+                        }
                     }
                     .onDelete(perform: delete)
                 }
@@ -125,6 +150,14 @@ struct LikedListView: View {
         if !offsets.isEmpty {
             toastManager.show("Aus Favoriten entfernt", icon: "heart.slash")
         }
+    }
+
+    private func playPreview(from item: LikedTrackEntity) {
+        let track = makeTrack(from: item)
+        guard let previewURL = track.previewURL else { return }
+
+        audio.setNowPlaying(track: track)
+        audio.toggle(url: previewURL)
     }
 
     private func makeTrack(from item: LikedTrackEntity) -> Track {

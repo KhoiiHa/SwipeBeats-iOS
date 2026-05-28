@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct ExploreView: View {
     @Environment(\.modelContext) private var modelContext

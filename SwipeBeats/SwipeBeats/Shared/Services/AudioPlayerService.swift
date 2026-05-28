@@ -16,10 +16,14 @@ final class AudioPlayerService: ObservableObject {
     @Published var nowPlayingTrack: Track?
     @Published private(set) var nowPlayingTitle: String?
     @Published private(set) var nowPlayingArtist: String?
+    @Published private(set) var hasNextTrack = false
 
     private var player: AVPlayer?
     private(set) var lastPreviewURL: URL?
     private var pendingNowPlayingTrack: Track?
+    private var queue: [Track] = []
+    private var currentQueueIndex: Int?
+    private var playbackEndObserver: NSObjectProtocol?
 
     var isPlaying: Bool { state == .playing }
     var hasActivePlaybackContext: Bool {
@@ -27,6 +31,15 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func play(url: URL) {
+        clearQueue()
+        play(url: url, resetQueue: false)
+    }
+
+    private func play(url: URL, resetQueue: Bool) {
+        if resetQueue {
+            clearQueue()
+        }
+
         if lastPreviewURL == url, state == .paused, player != nil {
             resumeCurrentPlayback()
             syncNowPlaying(for: url)
@@ -38,6 +51,7 @@ final class AudioPlayerService: ObservableObject {
         }
         lastPreviewURL = url
         let item = AVPlayerItem(url: url)
+        observePlaybackEnd(for: item)
         player = AVPlayer(playerItem: item)
         player?.play()
         syncNowPlaying(for: url)
@@ -50,6 +64,7 @@ final class AudioPlayerService: ObservableObject {
     }
 
     func stop() {
+        clearQueue()
         stopPlayerOnly()
         nowPlayingTrack = nil
         nowPlayingTitle = nil
@@ -58,6 +73,7 @@ final class AudioPlayerService: ObservableObject {
     }
 
     private func stopPlayerOnly() {
+        removePlaybackEndObserver()
         if let player {
             player.pause()
             player.seek(to: .zero)
@@ -73,6 +89,19 @@ final class AudioPlayerService: ObservableObject {
 
     func setNowPlaying(track: Track) {
         pendingNowPlayingTrack = track
+    }
+
+    func playQueue(_ tracks: [Track], startAt index: Int = 0) {
+        let playableTracks = tracks.filter { $0.previewURL != nil }
+        guard playableTracks.indices.contains(index) else { return }
+
+        queue = playableTracks
+        playQueuedTrack(at: index)
+    }
+
+    func playNext() {
+        guard hasNextTrack, let currentQueueIndex else { return }
+        playQueuedTrack(at: currentQueueIndex + 1)
     }
 
     func toggle(url: URL?) {
@@ -124,5 +153,67 @@ final class AudioPlayerService: ObservableObject {
         if let current = nowPlayingTrack, current.previewURL == url {
             return
         }
+    }
+
+    private func playQueuedTrack(at index: Int) {
+        guard queue.indices.contains(index),
+              let previewURL = queue[index].previewURL else {
+            stop()
+            return
+        }
+
+        currentQueueIndex = index
+        setNowPlaying(track: queue[index])
+        play(url: previewURL, resetQueue: false)
+        updateQueueState()
+    }
+
+    private func handlePlaybackEnded() {
+        guard let currentQueueIndex else {
+            stop()
+            return
+        }
+
+        let nextIndex = currentQueueIndex + 1
+        guard queue.indices.contains(nextIndex) else {
+            stop()
+            return
+        }
+
+        playQueuedTrack(at: nextIndex)
+    }
+
+    private func observePlaybackEnd(for item: AVPlayerItem) {
+        removePlaybackEndObserver()
+        playbackEndObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: item,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handlePlaybackEnded()
+            }
+        }
+    }
+
+    private func removePlaybackEndObserver() {
+        if let playbackEndObserver {
+            NotificationCenter.default.removeObserver(playbackEndObserver)
+            self.playbackEndObserver = nil
+        }
+    }
+
+    private func clearQueue() {
+        queue = []
+        currentQueueIndex = nil
+        updateQueueState()
+    }
+
+    private func updateQueueState() {
+        guard let currentQueueIndex else {
+            hasNextTrack = false
+            return
+        }
+        hasNextTrack = queue.indices.contains(currentQueueIndex + 1)
     }
 }
