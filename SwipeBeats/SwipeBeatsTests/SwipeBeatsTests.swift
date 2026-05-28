@@ -39,6 +39,17 @@ final class SwipeBeatsTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .error("Keine Internetverbindung."))
     }
 
+    func testExploreKeepsErrorStateWhenFiltersChange() async {
+        let viewModel = ExploreViewModel(service: MockSearchService(error: URLError(.timedOut)))
+
+        viewModel.query = "test"
+        await viewModel.searchCurrentQuery()
+        viewModel.onlyWithPreview = false
+        viewModel.applyFilters()
+
+        XCTAssertEqual(viewModel.state, .error("Zeitüberschreitung. Bitte erneut versuchen."))
+    }
+
     func testSwipeSkipMovesToNextTrack() async {
         let viewModel = SwipeViewModel(
             service: MockSearchService(results: [
@@ -53,6 +64,23 @@ final class SwipeBeatsTests: XCTestCase {
 
         XCTAssertEqual(viewModel.currentTrack?.id, 2)
         XCTAssertEqual(viewModel.state, .content)
+    }
+
+    func testSwipeSkipStopsActivePlayback() async {
+        let audio = AudioPlayerService()
+        let viewModel = SwipeViewModel(
+            service: MockSearchService(results: [
+                makeTrack(id: 1, title: "First")
+            ]),
+            audio: audio
+        )
+
+        await viewModel.load(term: "test")
+        audio.play(url: makeTrack(id: 1, title: "First").previewURL!)
+        viewModel.skip()
+
+        XCTAssertEqual(audio.state, .stopped)
+        XCTAssertNil(audio.nowPlayingTrack)
     }
 
     func testSwipeSkipLastTrackShowsEmptyState() async {
@@ -82,6 +110,20 @@ final class SwipeBeatsTests: XCTestCase {
         XCTAssertTrue(audio.hasNextTrack)
 
         audio.playNext()
+
+        XCTAssertEqual(audio.nowPlayingTrack?.id, 2)
+        XCTAssertFalse(audio.hasNextTrack)
+
+        audio.stop()
+    }
+
+    func testAudioQueueCanStartAtSelectedTrack() {
+        let audio = AudioPlayerService()
+
+        audio.playQueue([
+            makeTrack(id: 1, title: "First", previewURL: URL(string: "https://example.com/first.m4a")),
+            makeTrack(id: 2, title: "Second", previewURL: URL(string: "https://example.com/second.m4a"))
+        ], startAt: 1)
 
         XCTAssertEqual(audio.nowPlayingTrack?.id, 2)
         XCTAssertFalse(audio.hasNextTrack)
