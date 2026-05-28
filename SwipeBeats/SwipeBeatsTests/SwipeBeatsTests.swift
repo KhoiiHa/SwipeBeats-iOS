@@ -45,6 +45,25 @@ final class SwipeBeatsTests: XCTestCase {
         XCTAssertEqual(viewModel.currentTrack?.id, 2)
         XCTAssertEqual(viewModel.state, .content)
     }
+
+    func testAudioQueueTracksNextState() {
+        let audio = AudioPlayerService()
+
+        audio.playQueue([
+            makeTrack(id: 1, title: "First", previewURL: URL(string: "https://example.com/first.m4a")),
+            makeTrack(id: 2, title: "Second", previewURL: URL(string: "https://example.com/second.m4a"))
+        ])
+
+        XCTAssertEqual(audio.nowPlayingTrack?.id, 1)
+        XCTAssertTrue(audio.hasNextTrack)
+
+        audio.playNext()
+
+        XCTAssertEqual(audio.nowPlayingTrack?.id, 2)
+        XCTAssertFalse(audio.hasNextTrack)
+
+        audio.stop()
+    }
 }
 
 private struct MockSearchService: ITunesSearching {
