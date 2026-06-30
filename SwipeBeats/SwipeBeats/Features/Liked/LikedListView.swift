@@ -27,11 +27,11 @@ struct LikedListView: View {
     var body: some View {
         Group {
             if likedTracks.isEmpty {
-                ContentUnavailableView(
-                    "Noch keine Likes",
-                    systemImage: "heart",
-                    description: Text("Swipe dich durch Tracks und like deine Favoriten. Sie werden hier gespeichert.")
-                )
+                ContentUnavailableView {
+                    Label("Noch keine Likes", systemImage: "heart")
+                } description: {
+                    Text("Swipe dich durch Tracks und like deine Favoriten. Sie werden hier gespeichert.")
+                }
             } else {
                 List {
                     ForEach(likedTracks) { item in
@@ -71,6 +71,7 @@ struct LikedListView: View {
                     }
                     .onDelete(perform: delete)
                 }
+                .listStyle(.insetGrouped)
             }
         }
         .sheet(item: $detailTrack) { track in
@@ -88,12 +89,22 @@ struct LikedListView: View {
     }
 
     private func row(_ item: LikedTrackEntity) -> some View {
-        HStack(spacing: 12) {
-            artwork(item)
-                .frame(width: 58, height: 58)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        let hasPreview = item.previewURL.flatMap(URL.init(string:)) != nil
 
-            VStack(alignment: .leading, spacing: 4) {
+        return HStack(spacing: 12) {
+            artwork(item)
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(5)
+                        .background(.pink, in: Circle())
+                        .offset(x: 4, y: 4)
+                }
+
+            VStack(alignment: .leading, spacing: 5) {
                 Text(item.trackName)
                     .font(.headline)
                     .lineLimit(1)
@@ -102,14 +113,20 @@ struct LikedListView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                Label(hasPreview ? "30 Sek. Vorschau" : "Keine Vorschau", systemImage: hasPreview ? "play.circle.fill" : "speaker.slash.fill")
+                    .font(.caption)
+                    .foregroundStyle(hasPreview ? .teal : .secondary)
+                    .lineLimit(1)
             }
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.secondary)
+            Image(systemName: hasPreview ? "play.fill" : "chevron.right")
+                .font(.caption)
+                .foregroundStyle(hasPreview ? .teal : .secondary)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
         .contentShape(Rectangle())
     }
 

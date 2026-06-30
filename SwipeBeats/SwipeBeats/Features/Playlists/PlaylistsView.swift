@@ -15,35 +15,32 @@ struct PlaylistsView: View {
     var body: some View {
         Group {
             if playlists.isEmpty {
-                ContentUnavailableView(
-                    "Keine Playlists",
-                    systemImage: "music.note.list",
-                    description: Text("Erstelle deine erste Sammlung für gespeicherte Tracks.")
-                )
+                ContentUnavailableView {
+                    Label("Keine Playlists", systemImage: "music.note.list")
+                } description: {
+                    Text("Erstelle deine erste Sammlung für gespeicherte Tracks.")
+                } actions: {
+                    Button {
+                        newPlaylistName = ""
+                        showingCreateSheet = true
+                    } label: {
+                        Label("Playlist erstellen", systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.teal)
+                }
             } else {
                 List {
                     ForEach(playlists, id: \.id) { playlist in
                         NavigationLink {
                             PlaylistDetailView(playlist: playlist)
                         } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(playlist.name)
-                                    .font(.headline)
-                                    .lineLimit(1)
-
-                                Text(playlist.createdAt, style: .date)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                Text(trackCountText(for: playlist))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .padding(.vertical, 6)
+                            playlistRow(for: playlist)
                         }
                     }
                     .onDelete(perform: deletePlaylists)
                 }
+                .listStyle(.insetGrouped)
             }
         }
         .toolbar {
@@ -114,5 +111,37 @@ struct PlaylistsView: View {
 
     private func trackCountText(for playlist: PlaylistEntity) -> String {
         playlist.tracks.count == 1 ? "1 Track" : "\(playlist.tracks.count) Tracks"
+    }
+
+    private func playlistRow(for playlist: PlaylistEntity) -> some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.teal.opacity(0.14))
+                .frame(width: 50, height: 50)
+                .overlay {
+                    Image(systemName: "music.note.list")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.teal)
+                }
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(playlist.name)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                HStack(spacing: 8) {
+                    Label(trackCountText(for: playlist), systemImage: "music.note")
+
+                    Text("-")
+                        .foregroundStyle(.tertiary)
+
+                    Text(playlist.createdAt, style: .date)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            }
+            .padding(.vertical, 4)
+        }
     }
 }
