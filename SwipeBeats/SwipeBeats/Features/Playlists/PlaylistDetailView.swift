@@ -24,6 +24,7 @@ struct PlaylistDetailView: View {
                 VStack(spacing: 12) {
                     playlistSummary
                         .padding(.horizontal)
+                        .padding(.top, 8)
 
                     Button {
                         playPlaylist(in: playlist)
@@ -52,6 +53,7 @@ struct PlaylistDetailView: View {
                         }
                         .onDelete(perform: removeTracks)
                     }
+                    .listStyle(.insetGrouped)
                 }
             }
         }
