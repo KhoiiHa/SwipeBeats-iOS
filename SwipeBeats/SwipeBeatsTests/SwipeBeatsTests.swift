@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import SwipeBeats
 
 @MainActor
@@ -130,6 +131,31 @@ final class SwipeBeatsTests: XCTestCase {
 
         audio.stop()
     }
+
+    func testLikedTracksStoreSyncsLikedIdsAcrossInstances() async throws {
+        let container = try ModelContainer(
+            for: LikedTrackEntity.self,
+            PlaylistEntity.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let context = ModelContext(container)
+        let firstStore = LikedTracksStore(context: context)
+        let secondStore = LikedTracksStore(context: context)
+
+        firstStore.like(makeTrack(id: 42, title: "Synced"))
+        await waitForStoreSync {
+            secondStore.isLiked(trackId: 42)
+        }
+
+        XCTAssertTrue(secondStore.isLiked(trackId: 42))
+
+        secondStore.unlike(trackId: 42)
+        await waitForStoreSync {
+            firstStore.isLiked(trackId: 42) == false
+        }
+
+        XCTAssertFalse(firstStore.isLiked(trackId: 42))
+    }
 }
 
 private struct MockSearchService: ITunesSearching {
@@ -159,4 +185,10 @@ private func makeTrack(
         collectionViewURL: nil,
         primaryGenreName: nil
     )
+}
+
+private func waitForStoreSync(_ isSynced: () -> Bool) async {
+    for _ in 0..<5 where isSynced() == false {
+        await Task.yield()
+    }
 }

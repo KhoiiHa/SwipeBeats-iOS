@@ -6,14 +6,18 @@ import os
 @MainActor
 final class LikedTracksStore: ObservableObject {
 
+    private static let likedTracksDidChange = Notification.Name("LikedTracksStore.likedTracksDidChange")
+
     private let context: ModelContext
     private let logger = Logger(subsystem: "SwipeBeats", category: "LikedTracksStore")
     private var likedIdsCache: Set<Int> = []
+    private var changesCancellable: AnyCancellable?
     @Published private(set) var likedIds: Set<Int> = []
 
     init(context: ModelContext) {
         self.context = context
         loadCache()
+        observeExternalChanges()
     }
 
     func isLiked(trackId: Int) -> Bool {
@@ -37,6 +41,7 @@ final class LikedTracksStore: ObservableObject {
             try context.save()
             likedIdsCache.insert(track.id)
             likedIds = likedIdsCache
+            publishChange()
         } catch {
             logger.error("Failed to save liked track (id: \(track.id)). \(error.localizedDescription)")
             context.delete(entity)
@@ -63,6 +68,7 @@ final class LikedTracksStore: ObservableObject {
                 try context.save()
                 likedIdsCache.remove(trackId)
                 likedIds = likedIdsCache
+                publishChange()
             } catch {
                 logger.error("Failed to remove liked track (id: \(trackId)). \(error.localizedDescription)")
                 let rollback = LikedTrackEntity(
@@ -85,5 +91,20 @@ final class LikedTracksStore: ObservableObject {
         let items = (try? context.fetch(descriptor)) ?? []
         likedIdsCache = Set(items.map { $0.trackId })
         likedIds = likedIdsCache
+    }
+
+    private func observeExternalChanges() {
+        changesCancellable = NotificationCenter.default.publisher(for: Self.likedTracksDidChange)
+            .sink { [weak self] notification in
+                let source = notification.object as? LikedTracksStore
+                Task { @MainActor [weak self] in
+                    guard let self, source !== self else { return }
+                    self.loadCache()
+                }
+            }
+    }
+
+    private func publishChange() {
+        NotificationCenter.default.post(name: Self.likedTracksDidChange, object: self)
     }
 }
