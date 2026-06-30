@@ -18,7 +18,7 @@ struct PlaylistsView: View {
                 ContentUnavailableView(
                     "Keine Playlists",
                     systemImage: "music.note.list",
-                    description: Text("Erstelle deine erste Playlist.")
+                    description: Text("Erstelle deine erste Sammlung für gespeicherte Tracks.")
                 )
             } else {
                 List {
@@ -32,6 +32,10 @@ struct PlaylistsView: View {
                                     .lineLimit(1)
 
                                 Text(playlist.createdAt, style: .date)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                Text(trackCountText(for: playlist))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -106,5 +110,9 @@ struct PlaylistsView: View {
         if !offsets.isEmpty {
             toastManager.show("Playlist gelöscht", icon: "trash")
         }
+    }
+
+    private func trackCountText(for playlist: PlaylistEntity) -> String {
+        playlist.tracks.count == 1 ? "1 Track" : "\(playlist.tracks.count) Tracks"
     }
 }

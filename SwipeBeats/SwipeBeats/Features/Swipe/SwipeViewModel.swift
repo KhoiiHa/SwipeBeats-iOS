@@ -87,6 +87,7 @@ final class SwipeViewModel: ObservableObject {
             currentIndex = nextIndex
             state = .content
         } else {
+            currentIndex = nextIndex
             state = .empty
         }
     }

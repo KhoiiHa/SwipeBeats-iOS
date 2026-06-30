@@ -15,45 +15,61 @@ struct SwipeView: View {
         self.onOpenArtistInExplore = onOpenArtistInExplore
     }
 
-
     var body: some View {
         ZStack {
             switch viewModel.state {
             case .loading:
-                ProgressView("Tracks werden geladen…")
+                VStack(spacing: 16) {
+                    searchHeader
+                    Spacer()
+
+                    ProgressView("Tracks werden geladen…")
+
+                    Spacer()
+                }
 
             case .empty:
-                VStack(spacing: 12) {
-                    Text("Keine Tracks verfügbar")
-                        .font(.headline)
+                VStack(spacing: 16) {
+                    searchHeader
+                    Spacer()
 
-                    Button("Neu laden") {
-                        if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
-                            Task { await viewModel.load(term: preset.term) }
-                        } else {
-                            Task { await viewModel.load(term: selectedTerm) }
-                        }
+                    ContentUnavailableView(
+                        "Keine Tracks verfügbar",
+                        systemImage: "music.note",
+                        description: Text("Für diese Auswahl wurden keine spielbaren Vorschauen gefunden.")
+                    )
+
+                    Button {
+                        reloadSelectedTerm()
+                    } label: {
+                        Label("Neu laden", systemImage: "arrow.clockwise")
                     }
+                    .buttonStyle(.borderedProminent)
                     .tint(.teal)
+
+                    Spacer()
                 }
 
             case .error(let message):
-                VStack(spacing: 12) {
-                    Text("Fehler")
-                        .font(.headline)
+                VStack(spacing: 16) {
+                    searchHeader
+                    Spacer()
 
-                    Text(message)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    ContentUnavailableView(
+                        "Fehler",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text(message.isEmpty ? "Bitte erneut versuchen." : message)
+                    )
 
-                    Button("Erneut versuchen") {
-                        if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
-                            Task { await viewModel.load(term: preset.term) }
-                        } else {
-                            Task { await viewModel.load(term: selectedTerm) }
-                        }
+                    Button {
+                        reloadSelectedTerm()
+                    } label: {
+                        Label("Erneut versuchen", systemImage: "arrow.clockwise")
                     }
+                    .buttonStyle(.borderedProminent)
                     .tint(.teal)
+
+                    Spacer()
                 }
 
             case .content:
@@ -112,27 +128,23 @@ struct SwipeView: View {
                         .padding(.horizontal)
                     }
                 } else {
-                    Text("Kein Track")
+                    ContentUnavailableView(
+                        "Kein Track",
+                        systemImage: "music.note",
+                        description: Text("Bitte lade die Auswahl erneut.")
+                    )
                 }
             }
         }
         .task {
-            if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
-                await viewModel.loadInitialIfNeeded(term: preset.term)
-            } else {
-                await viewModel.loadInitialIfNeeded(term: selectedTerm)
-            }
+            await viewModel.loadInitialIfNeeded(term: selectedSearchTerm())
         }
         .onChange(of: selectedTerm) { _, newValue in
             // Reset swipe UI state when switching presets
             dragOffset = .zero
             isAnimatingOut = false
 
-            if let preset = Constants.searchPresets.first(where: { $0.id == newValue }) {
-                Task { await viewModel.load(term: preset.term) }
-            } else {
-                Task { await viewModel.load(term: newValue) }
-            }
+            Task { await viewModel.load(term: searchTerm(for: newValue)) }
         }
         .sheet(item: $detailTrack) { track in
             NavigationStack {
@@ -211,11 +223,7 @@ struct SwipeView: View {
             .pickerStyle(.menu)
 
             Button {
-                if let preset = Constants.searchPresets.first(where: { $0.id == selectedTerm }) {
-                    Task { await viewModel.load(term: preset.term) }
-                } else {
-                    Task { await viewModel.load(term: selectedTerm) }
-                }
+                reloadSelectedTerm()
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
@@ -224,5 +232,20 @@ struct SwipeView: View {
             .disabled(viewModel.state == .loading)
         }
         .padding(.horizontal)
+    }
+
+    private func selectedSearchTerm() -> String {
+        searchTerm(for: selectedTerm)
+    }
+
+    private func searchTerm(for value: String) -> String {
+        if let preset = Constants.searchPresets.first(where: { $0.id == value }) {
+            return preset.term
+        }
+        return value
+    }
+
+    private func reloadSelectedTerm() {
+        Task { await viewModel.load(term: selectedSearchTerm()) }
     }
 }

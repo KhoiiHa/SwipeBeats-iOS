@@ -18,7 +18,7 @@ struct PlaylistDetailView: View {
                 ContentUnavailableView(
                     "Leere Playlist",
                     systemImage: "music.note",
-                    description: Text("Diese Playlist enthält noch keine Tracks.")
+                    description: Text("Tracks erscheinen hier, sobald du sie einer Playlist hinzufügst.")
                 )
             } else {
                 VStack(spacing: 12) {
@@ -28,7 +28,7 @@ struct PlaylistDetailView: View {
                     Button {
                         playPlaylist(in: playlist)
                     } label: {
-                        Label("Playlist abspielen", systemImage: "play.fill")
+                        Label(playButtonTitle, systemImage: playButtonIcon)
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
@@ -84,10 +84,10 @@ struct PlaylistDetailView: View {
         let totalCount = playlist.tracks.count
 
         return HStack(spacing: 8) {
-            Image(systemName: "music.note.list")
+            Image(systemName: playableCount == 0 ? "speaker.slash.fill" : "music.note.list")
                 .foregroundStyle(.teal)
 
-            Text("\(playableCount) von \(totalCount) Tracks spielbar")
+            Text(playlistSummaryText(playableCount: playableCount, totalCount: totalCount))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -96,6 +96,21 @@ struct PlaylistDetailView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var playButtonTitle: String {
+        firstPlayableTrack(in: playlist) == nil ? "Keine Vorschau verfügbar" : "Playlist abspielen"
+    }
+
+    private var playButtonIcon: String {
+        firstPlayableTrack(in: playlist) == nil ? "speaker.slash.fill" : "play.fill"
+    }
+
+    private func playlistSummaryText(playableCount: Int, totalCount: Int) -> String {
+        if playableCount == 0 {
+            return "Keine spielbaren Vorschauen in \(totalCount) Tracks"
+        }
+        return "\(playableCount) von \(totalCount) Tracks spielbar"
     }
 
     private func ensureStore() {
