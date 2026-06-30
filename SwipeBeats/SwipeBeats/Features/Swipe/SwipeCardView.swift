@@ -5,15 +5,16 @@ struct SwipeCardView: View {
     @ObservedObject var audio: AudioPlayerService
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 18) {
             AsyncArtworkImage(url: track.artworkURL)
-                .frame(width: 220, height: 220)
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .frame(width: 248, height: 248)
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .shadow(color: .black.opacity(0.14), radius: 18, x: 0, y: 10)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Text(track.trackName)
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .lineLimit(2)
                     .truncationMode(.tail)
                     .multilineTextAlignment(.center)
@@ -36,11 +37,29 @@ struct SwipeCardView: View {
 
             previewControls
         }
-        .padding(20)
+        .padding(22)
         .frame(maxWidth: .infinity)
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+        .background {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(.thinMaterial)
+                .overlay {
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(0.18),
+                            .teal.opacity(0.08),
+                            .pink.opacity(0.06)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                }
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .strokeBorder(.white.opacity(0.24), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.12), radius: 20, x: 0, y: 12)
     }
 
     private var previewControls: some View {
@@ -50,8 +69,10 @@ struct SwipeCardView: View {
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: isCurrentTrackPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(.teal)
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 42, height: 42)
+                    .background(.teal, in: Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(isCurrentTrackPlaying ? "Vorschau pausieren" : "Vorschau abspielen")
@@ -63,13 +84,12 @@ struct SwipeCardView: View {
 
                 Spacer()
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(.regularMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(.white.opacity(0.18), lineWidth: 0.5)
             }
         }
         .buttonStyle(.plain)
