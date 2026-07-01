@@ -10,7 +10,10 @@ struct AppRootView: View {
     @State private var swipeViewModel: SwipeViewModel?
     @State private var selectedTab: AppTab = .swipe
     private let di = AppDIContainer()
-    private let miniPlayerReservedHeight: CGFloat = 62
+    private let miniPlayerHeight = MiniPlayerBar.preferredHeight
+    private let miniPlayerBottomSpacing: CGFloat = 8
+    private let miniPlayerContentClearance: CGFloat = 4
+    private let toastMiniPlayerSpacing: CGFloat = 10
     private let tabBarHeight: CGFloat = 49
 
     var body: some View {
@@ -65,7 +68,7 @@ struct AppRootView: View {
             .environmentObject(toastManager)
             .safeAreaInset(edge: .bottom) {
                 if audio.hasActivePlaybackContext {
-                    Color.clear.frame(height: miniPlayerReservedHeight + 8)
+                    Color.clear.frame(height: miniPlayerReservedHeight)
                 }
             }
             .overlay(alignment: .bottom) {
@@ -75,9 +78,7 @@ struct AppRootView: View {
                             .padding(.horizontal, 12)
                             .padding(
                                 .bottom,
-                                geometry.safeAreaInsets.bottom
-                                    + tabBarHeight
-                                    + (audio.hasActivePlaybackContext ? miniPlayerReservedHeight + 16 : 8)
+                                toastBottomPadding(for: geometry.safeAreaInsets.bottom)
                             )
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -89,7 +90,8 @@ struct AppRootView: View {
                             }
                         }
                         .padding(.horizontal, 12)
-                        .padding(.bottom, geometry.safeAreaInsets.bottom + tabBarHeight + 8)
+                        .frame(minHeight: miniPlayerHeight)
+                        .padding(.bottom, miniPlayerBottomPadding(for: geometry.safeAreaInsets.bottom))
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -128,6 +130,24 @@ struct AppRootView: View {
         exploreViewModel.suppressAutomaticPresetLoadOnce()
         selectedTab = .explore
         Task { await exploreViewModel.runExternalArtistSearch(trimmedArtistName) }
+    }
+
+    private var miniPlayerReservedHeight: CGFloat {
+        miniPlayerHeight + miniPlayerBottomSpacing + miniPlayerContentClearance
+    }
+
+    private func miniPlayerBottomPadding(for safeAreaBottom: CGFloat) -> CGFloat {
+        safeAreaBottom + tabBarHeight + miniPlayerBottomSpacing
+    }
+
+    private func toastBottomPadding(for safeAreaBottom: CGFloat) -> CGFloat {
+        let basePadding = safeAreaBottom + tabBarHeight + miniPlayerBottomSpacing
+
+        if audio.hasActivePlaybackContext {
+            return basePadding + miniPlayerHeight + toastMiniPlayerSpacing
+        }
+
+        return basePadding
     }
 }
 
