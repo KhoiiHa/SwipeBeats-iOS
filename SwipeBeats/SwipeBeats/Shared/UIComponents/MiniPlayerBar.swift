@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct MiniPlayerBar: View {
+    static let preferredHeight: CGFloat = 58
+
     @ObservedObject var audio: AudioPlayerService
     var onTap: (() -> Void)? = nil
 
@@ -62,6 +64,7 @@ struct MiniPlayerBar: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, minHeight: Self.preferredHeight)
         .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onTapGesture {
             onTap?()
