@@ -8,7 +8,7 @@ enum Constants {
     nonisolated static let defaultSearchTerm = "lofi beats"
     nonisolated static let defaultSearchLimit = 25
 
-    // MARK: - Quick presets (for future UI picker)
+    // MARK: - Discovery presets
     static let searchPresets: [SearchPreset] = [
         // NOTE: iTunes Search is fuzzy by default.
         // - `.genre` presets will be narrowed via `attribute=genreIndex`.
