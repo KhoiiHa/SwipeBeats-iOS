@@ -5,13 +5,13 @@
 SwipeBeats ist eine moderne iOS-App zur schnellen Musik-Discovery über kurze Audio-Previews.  
 Die App kombiniert klassische Suche mit einem Swipe-basierten Flow, um neue Songs intuitiv zu entdecken, vorzuhören und zu organisieren.
 
-👉 Fokus: **schnelles Entdecken, direktes Vorhören und einfache Organisation von Musik**
+👉 Fokus: **modernes iOS-App-Gefühl, Audio-Interaktion, Swipe-UX und klare MVP-Architektur**
 
 ---
 
 ## 🧭 Portfolio Snapshot
 
-SwipeBeats zeigt einen kompakten, realistischen iOS-MVP mit mehreren zusammenhängenden Produktbereichen:
+SwipeBeats ist ein kompaktes Portfolio-/UI-UX-Showcase und zeigt einen realistischen iOS-MVP mit mehreren zusammenhängenden Produktbereichen:
 
 - **Discovery Flow:** Suchen, filtern, sortieren und per Swipe neue Tracks entdecken
 - **Audio Playback:** globaler Preview-Player mit MiniPlayer und Playlist-Queue
@@ -26,13 +26,8 @@ SwipeBeats zeigt einen kompakten, realistischen iOS-MVP mit mehreren zusammenhä
 <p align="center">
   <img src="./screens/swipe.png" width="20%" />
   <img src="./screens/explore.png" width="20%" />
-  <img src="./screens/detail.png" width="20%" />
-</p>
-
-<p align="center">
   <img src="./screens/favorites.png" width="20%" />
   <img src="./screens/playlists.png" width="20%" />
-  <img src="./screens/playlist-detail.png" width="20%" />
 </p>
 
 ---
@@ -88,24 +83,28 @@ SwipeBeats zeigt einen kompakten, realistischen iOS-MVP mit mehreren zusammenhä
 
 Aktuell abgesichert:
 
+- Discovery-Presets behalten einen stabilen Default und eindeutige IDs
 - Explore filtert Tracks ohne Preview korrekt
 - Explore sortiert Tracks alphabetisch
 - Explore zeigt einen spezifischen Netzwerkfehler
+- Explore behält Error-States bei Filteränderungen stabil
 - Swipe springt nach Skip zum nächsten Track
 - Swipe zeigt nach dem letzten Track einen Empty-State
 - Audio-Queue setzt `hasNextTrack` und `nowPlayingTrack` korrekt
+- Like-State synchronisiert sich zwischen Store-Instanzen
+- UI-Smoke-Tests öffnen die zentralen Tabs
 
 Verifikation:
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-xcodebuild build-for-testing \
+xcodebuild test \
   -project SwipeBeats/SwipeBeats.xcodeproj \
   -scheme SwipeBeats \
-  -destination 'generic/platform=iOS Simulator'
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
-Hinweis: Der vollständige Simulator-Testlauf kann lokal beim Start des Simulators hängen. Die Test-Targets kompilieren mit `build-for-testing` erfolgreich.
+Zuletzt verifiziert: vollständiger Simulator-Testlauf mit `TEST SUCCEEDED`.
 
 ---
 
@@ -116,6 +115,8 @@ Eine kleine, verständliche Musik-Discovery-App bauen, die als Portfolio-Projekt
 
 ### Produktentscheidung
 Der MVP bleibt bewusst fokussiert. SwipeBeats streamt keine vollständigen Songs, sondern nutzt die iTunes Search API und deren 30-Sekunden-Previews. Dadurch bleibt die App technisch schlank und trotzdem direkt nutzbar.
+
+SwipeBeats ist nicht als große Musikplattform geplant, sondern als zweites Showcase-Projekt neben ReadRhythm-iOS: der Schwerpunkt liegt auf Interaktion, Animation, Audio-Feedback und einem polierten SwiftUI-Erlebnis.
 
 ### Technische Umsetzung
 - SwiftUI Views bleiben möglichst leichtgewichtig
@@ -130,6 +131,7 @@ Der MVP bleibt bewusst fokussiert. SwipeBeats streamt keine vollständigen Songs
 - Favoriten können direkt previewed werden
 - Empty- und Error-States sind konsistenter und nutzerfreundlicher
 - Kritische ViewModel- und Audio-Flows sind testbar abgesichert
+- Kern-Screens wurden für Portfolio-Screenshots visuell geprüft
 
 ---
 
@@ -149,13 +151,13 @@ SwipeBeats ist bewusst als leichtgewichtige Discovery-App umgesetzt:
 SwipeBeats is a modern iOS app for fast music discovery using short audio previews.  
 It combines traditional search with a swipe-based interaction model to help users quickly explore, preview, and organize music.
 
-👉 Focus: **fast discovery, instant preview, and simple music organization**
+👉 Focus: **modern iOS feel, audio interaction, swipe UX, and clear MVP architecture**
 
 ---
 
 ## 🧭 Portfolio Snapshot
 
-SwipeBeats demonstrates a compact, realistic iOS MVP with several connected product areas:
+SwipeBeats is a compact portfolio/UI-UX showcase and demonstrates a realistic iOS MVP with several connected product areas:
 
 - **Discovery Flow:** search, filter, sort, and swipe through tracks
 - **Audio Playback:** global preview player with MiniPlayer and playlist queue
@@ -170,13 +172,8 @@ SwipeBeats demonstrates a compact, realistic iOS MVP with several connected prod
 <p align="center">
   <img src="./screens/swipe.png" width="20%" />
   <img src="./screens/explore.png" width="20%" />
-  <img src="./screens/detail.png" width="20%" />
-</p>
-
-<p align="center">
   <img src="./screens/favorites.png" width="20%" />
   <img src="./screens/playlists.png" width="20%" />
-  <img src="./screens/playlist-detail.png" width="20%" />
 </p>
 
 ---
@@ -232,24 +229,28 @@ SwipeBeats demonstrates a compact, realistic iOS MVP with several connected prod
 
 Currently covered:
 
+- Discovery presets keep a stable default and unique IDs
 - Explore filters tracks without previews
 - Explore sorts tracks alphabetically
 - Explore shows a specific network error
+- Explore keeps error states stable when filters change
 - Swipe advances to the next track after skip
 - Swipe shows an empty state after the last track
 - Audio queue updates `hasNextTrack` and `nowPlayingTrack` correctly
+- Like state syncs between store instances
+- UI smoke tests open the core tabs
 
 Verification:
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-xcodebuild build-for-testing \
+xcodebuild test \
   -project SwipeBeats/SwipeBeats.xcodeproj \
   -scheme SwipeBeats \
-  -destination 'generic/platform=iOS Simulator'
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
-Note: A full simulator test run may hang locally while launching the simulator. The test targets compile successfully with `build-for-testing`.
+Last verified: full simulator test run with `TEST SUCCEEDED`.
 
 ---
 
@@ -260,6 +261,8 @@ Build a small, understandable music discovery app that combines several practica
 
 ### Product Decision
 The MVP intentionally stays focused. SwipeBeats does not stream full songs; it uses the iTunes Search API and its 30-second previews. This keeps the app lightweight while still making it immediately usable.
+
+SwipeBeats is not planned as a large music platform. It is a second showcase project alongside ReadRhythm-iOS, focused on interaction, motion, audio feedback, and polished SwiftUI screens.
 
 ### Technical Approach
 - SwiftUI views stay lightweight
@@ -274,6 +277,7 @@ The MVP intentionally stays focused. SwipeBeats does not stream full songs; it u
 - Favorites can be previewed directly
 - Empty and error states are more consistent and user-friendly
 - Critical ViewModel and audio flows are covered by tests
+- Core screens were visually checked for portfolio screenshots
 
 ---
 
