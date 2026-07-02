@@ -5,6 +5,17 @@ import SwiftData
 @MainActor
 final class SwipeBeatsTests: XCTestCase {
 
+    func testSearchPresetsKeepStableDefaultAndUniqueIds() {
+        let presetIds = Constants.searchPresets.map(\.id)
+
+        XCTAssertTrue(presetIds.contains(Constants.defaultSearchPresetId))
+        XCTAssertEqual(Set(presetIds).count, presetIds.count)
+        XCTAssertFalse(Constants.searchPresets.contains { preset in
+            preset.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                preset.term.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        })
+    }
+
     func testExploreFiltersTracksWithoutPreview() async {
         let viewModel = ExploreViewModel(service: MockSearchService(results: [
             makeTrack(id: 1, title: "Playable", previewURL: URL(string: "https://example.com/1.m4a")),

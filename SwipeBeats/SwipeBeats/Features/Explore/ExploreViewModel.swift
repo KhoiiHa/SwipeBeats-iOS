@@ -308,8 +308,3 @@ final class ExploreViewModel: ObservableObject {
         return filtered
     }
 }
-
-// Smoke test:
-// - Preset "Klassik": primaryGenreName should mostly be "Classical"
-// - Preset "EDM": should prefer "Dance"/"Electronic"
-// - Preset "Solo Piano" (keyword): unchanged results
