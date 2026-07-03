@@ -27,7 +27,7 @@ SwipeBeats ist ein kompaktes Portfolio-/UI-UX-Showcase und zeigt einen realistis
   <img src="./screens/swipe.png" width="20%" />
   <img src="./screens/explore.png" width="20%" />
   <img src="./screens/favorites.png" width="20%" />
-  <img src="./screens/playlists.png" width="20%" />
+  <img src="./screens/detail.png" width="20%" />
 </p>
 
 ---
@@ -58,6 +58,11 @@ SwipeBeats ist ein kompaktes Portfolio-/UI-UX-Showcase und zeigt einen realistis
 - Persistente Speicherung über SwiftData  
 - Schneller Zugriff auf gespeicherte Songs
 - Preview direkt aus Favoriten starten
+
+### 🎵 Track Details
+- Große Artwork-Ansicht mit Track- und Artist-Informationen
+- Preview-, Favoriten- und Playlist-Aktionen an einem Ort
+- Direkter Absprung zu Apple Music
 
 ### 📂 Playlists
 - Playlists erstellen, umbenennen und löschen  
@@ -173,7 +178,7 @@ SwipeBeats is a compact portfolio/UI-UX showcase and demonstrates a realistic iO
   <img src="./screens/swipe.png" width="20%" />
   <img src="./screens/explore.png" width="20%" />
   <img src="./screens/favorites.png" width="20%" />
-  <img src="./screens/playlists.png" width="20%" />
+  <img src="./screens/detail.png" width="20%" />
 </p>
 
 ---
@@ -204,6 +209,11 @@ SwipeBeats is a compact portfolio/UI-UX showcase and demonstrates a realistic iO
 - Persistent storage via SwiftData  
 - Quick access to saved songs
 - Start previews directly from favorites
+
+### 🎵 Track Details
+- Large artwork view with track and artist information
+- Preview, favorite, and playlist actions in one place
+- Direct handoff to Apple Music
 
 ### 📂 Playlists
 - Create, rename, and delete playlists  
